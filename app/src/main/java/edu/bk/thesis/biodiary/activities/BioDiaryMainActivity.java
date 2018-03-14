@@ -1,6 +1,7 @@
 package edu.bk.thesis.biodiary.activities;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,11 +11,16 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import java.util.Calendar;
+import java.util.Date;
+
 import edu.bk.thesis.biodiary.R;
 import edu.bk.thesis.biodiary.adapters.DiaryAdapter;
+import edu.bk.thesis.biodiary.models.Diary;
 
 
-public class BioDiaryMainActivity extends AppCompatActivity implements DiaryAdapter.DiaryAdapterOnClickHandler
+public class BioDiaryMainActivity extends AppCompatActivity
+        implements DiaryAdapter.DiaryAdapterOnClickHandler
 {
     private RecyclerView mDiary;
     private DiaryAdapter mDiaryAdapter;
@@ -34,7 +40,10 @@ public class BioDiaryMainActivity extends AppCompatActivity implements DiaryAdap
         mDiaryAdapter = new DiaryAdapter(this);
         mDiary.setAdapter(mDiaryAdapter);
 
-        String[] diaryData = { "Diary 1", "Diary 2", "Diary 3" };
+        Diary[] diaryData = {
+                new Diary("Title 1", Calendar.getInstance().getTime(), "Contentttttt"),
+                new Diary("Title 2", Calendar.getInstance().getTime(), "Contentttttttttttttt"),
+                new Diary("Title 3", Calendar.getInstance().getTime(), "Contentttttttttt") };
         mDiaryAdapter.setDiaryData(diaryData);
     }
 
@@ -60,8 +69,10 @@ public class BioDiaryMainActivity extends AppCompatActivity implements DiaryAdap
     }
 
     @Override
-    public void onClick(String diary)
+    public void onClick(Diary diary)
     {
-        Toast.makeText(this, diary, Toast.LENGTH_SHORT).show();
+        Intent intentToStartDiaryDetailActivity = new Intent(this, DiaryDetailActivity.class);
+        intentToStartDiaryDetailActivity.putExtra(Intent.EXTRA_TEXT, diary);
+        startActivity(intentToStartDiaryDetailActivity);
     }
 }

@@ -8,19 +8,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 import edu.bk.thesis.biodiary.R;
+import edu.bk.thesis.biodiary.models.Diary;
 
 
 public class DiaryAdapter extends RecyclerView.Adapter<DiaryAdapter.DiaryAdapterViewHolder>
 {
-    private String[] mDiaryData;
+    private       Diary[]                    mDiaryData;
     private final DiaryAdapterOnClickHandler mClickHandler;
 
-    public interface DiaryAdapterOnClickHandler {
-        void onClick(String diary);
+    public interface DiaryAdapterOnClickHandler
+    {
+        void onClick(Diary diary);
     }
 
-    public DiaryAdapter(DiaryAdapterOnClickHandler clickHandler) {
+    public DiaryAdapter(DiaryAdapterOnClickHandler clickHandler)
+    {
         mClickHandler = clickHandler;
     }
 
@@ -36,8 +44,14 @@ public class DiaryAdapter extends RecyclerView.Adapter<DiaryAdapter.DiaryAdapter
     @Override
     public void onBindViewHolder(DiaryAdapterViewHolder holder, int position)
     {
-        String diaryTitle = mDiaryData[position];
-        holder.mTitle.setText(diaryTitle);
+        Diary diary = mDiaryData[position];
+
+        holder.mTitle.setText(diary.getTitle());
+
+        DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss", Locale.US);
+        holder.mDate.setText(df.format(diary.getDate()));
+
+        holder.mContent.setText(diary.getContent());
     }
 
     @Override
@@ -49,7 +63,7 @@ public class DiaryAdapter extends RecyclerView.Adapter<DiaryAdapter.DiaryAdapter
         return mDiaryData.length;
     }
 
-    public void setDiaryData(String[] diaryData)
+    public void setDiaryData(Diary[] diaryData)
     {
         mDiaryData = diaryData;
         notifyDataSetChanged();
@@ -58,11 +72,15 @@ public class DiaryAdapter extends RecyclerView.Adapter<DiaryAdapter.DiaryAdapter
     class DiaryAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {
         final TextView mTitle;
+        final TextView mDate;
+        final TextView mContent;
 
         DiaryAdapterViewHolder(View view)
         {
             super(view);
             mTitle = view.findViewById(R.id.tv_diary_title);
+            mDate = view.findViewById(R.id.tv_diary_date);
+            mContent = view.findViewById(R.id.tv_diary_content);
 
             view.setOnClickListener(this);
         }
@@ -70,8 +88,8 @@ public class DiaryAdapter extends RecyclerView.Adapter<DiaryAdapter.DiaryAdapter
         @Override
         public void onClick(View v)
         {
-            int adapterPosition = getAdapterPosition();
-            String diary = mDiaryData[adapterPosition];
+            int   adapterPosition = getAdapterPosition();
+            Diary diary           = mDiaryData[adapterPosition];
             mClickHandler.onClick(diary);
         }
     }
