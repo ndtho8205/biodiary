@@ -42,7 +42,7 @@ public class DiaryAdapter extends RecyclerView.Adapter<DiaryAdapter.DiaryAdapter
 
         holder.mTimestamp.setText(diary.getDateInString());
 
-        holder.mContent.setText(diary.getContent());
+        holder.mContent.setText(diary.getShortContent(200));
     }
 
     @Override

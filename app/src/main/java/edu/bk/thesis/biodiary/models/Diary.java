@@ -65,4 +65,12 @@ public class Diary implements Serializable
         SimpleDateFormat df = new SimpleDateFormat("dd/MM/YYYY HH:mm:ss", Locale.US);
         return df.format(getDate());
     }
+
+    public String getShortContent(int wordLength)
+    {
+        //TODO: implement get substring by word, instead of characters.
+        return wordLength > mContent.length()
+               ? mContent
+               : mContent.substring(0, wordLength) + "...";
+    }
 }

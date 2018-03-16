@@ -26,8 +26,8 @@
         android:layout_height="wrap_content"
         android:layout_toEndOf="@id/tv_diary_dot"
         android:layout_toRightOf="@id/tv_diary_dot"
-        android:textColor="#858585"
-        android:textSize="14sp" />
+        android:textColor="@color/colorPrimaryText"
+        android:textSize="16sp" />
 
     <TextView
         android:id="@+id/tv_diary_content"
@@ -36,7 +36,7 @@
         android:layout_below="@id/tv_diary_timestamp"
         android:layout_toEndOf="@id/tv_diary_dot"
         android:layout_toRightOf="@id/tv_diary_dot"
-        android:textColor="#232323"
-        android:textSize="18sp" />
+        android:textColor="@color/colorSecondaryText"
+        android:textSize="13sp" />
 
 </RelativeLayout>
