@@ -7,12 +7,7 @@
     tools:context="edu.bk.thesis.biodiary.activities.DiaryDetailActivity">
 
     <TextView
-        android:id="@+id/tv_diary_detail_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        android:id="@+id/tv_diary_detail_date"
+        android:id="@+id/tv_diary_detail_timestamp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="edu.bk.thesis.biodiary">
 
     <application
@@ -22,7 +23,10 @@
         </activity>
 
         <activity android:name=".activities.BioDiaryMainActivity" />
-        <activity android:name=".activities.DiaryDetailActivity" />
+        <activity
+            android:name=".activities.DiaryDetailActivity"
+            android:parentActivityName=".activities.BioDiaryMainActivity"
+            tools:targetApi="jelly_bean" />
     </application>
 
 </manifest>

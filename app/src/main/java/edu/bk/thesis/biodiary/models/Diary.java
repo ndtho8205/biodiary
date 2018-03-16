@@ -1,7 +1,6 @@
 package edu.bk.thesis.biodiary.models;
 
 import java.io.Serializable;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -9,41 +8,41 @@ import java.util.Locale;
 
 public class Diary implements Serializable
 {
-    private String mTitle;
-    private Date   mDate;
+    public static final String TABLE_NAME = "Diary";
+
+    public static final String COLUMN_ID        = "id";
+    public static final String COLUMN_TIMESTAMP = "timestamp";
+    public static final String COLUMN_CONTENT   = "content";
+    public static final String CREATE_TABLE     =
+            "CREATE TABLE " + TABLE_NAME + "("
+            + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+            + COLUMN_TIMESTAMP + " INTEGER,"
+            + COLUMN_CONTENT + " TEXT,"
+            + ")";
+    private int    mId;
+    private long   mTimestamp;
     private String mContent;
 
-    public Diary(String mTitle, Date mDate, String mContent)
+    public Diary(int id, long timestamp, String content)
     {
-        this.mTitle = mTitle;
-        this.mDate = mDate;
-        this.mContent = mContent;
+        mId = id;
+        mTimestamp = timestamp;
+        mContent = content;
     }
 
-    public String getTitle()
+    public int getId()
     {
-        return mTitle;
+        return mId;
     }
 
-    public void setTitle(String mTitle)
+    public long getTimestamp()
     {
-        this.mTitle = mTitle;
+        return mTimestamp;
     }
 
-    public Date getDate()
+    public void setTimestamp(long timestamp)
     {
-        return mDate;
-    }
-
-    public String getDateInString()
-    {
-        DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss", Locale.US);
-        return df.format(mDate.getDate());
-    }
-
-    public void setDate(Date mDate)
-    {
-        this.mDate = mDate;
+        mTimestamp = timestamp;
     }
 
     public String getContent()
@@ -51,8 +50,19 @@ public class Diary implements Serializable
         return mContent;
     }
 
-    public void setContent(String mContent)
+    public void setContent(String content)
     {
-        this.mContent = mContent;
+        mContent = content;
+    }
+
+    public Date getDate()
+    {
+        return new Date(mTimestamp);
+    }
+
+    public String getDateInString()
+    {
+        SimpleDateFormat df = new SimpleDateFormat("dd/MM/YYYY HH:mm:ss", Locale.US);
+        return df.format(getDate());
     }
 }

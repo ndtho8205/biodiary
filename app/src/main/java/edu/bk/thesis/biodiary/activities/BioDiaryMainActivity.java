@@ -1,6 +1,5 @@
 package edu.bk.thesis.biodiary.activities;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -9,9 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
 
-import java.util.Calendar;
 import java.util.Date;
 
 import edu.bk.thesis.biodiary.R;
@@ -41,9 +38,9 @@ public class BioDiaryMainActivity extends AppCompatActivity
         mDiary.setAdapter(mDiaryAdapter);
 
         Diary[] diaryData = {
-                new Diary("Title 1", Calendar.getInstance().getTime(), "Contentttttt"),
-                new Diary("Title 2", Calendar.getInstance().getTime(), "Contentttttttttttttt"),
-                new Diary("Title 3", Calendar.getInstance().getTime(), "Contentttttttttt") };
+                new Diary(1, new Date().getTime(), "Contentttttt"),
+                new Diary(2, new Date().getTime(), "Contentttttttttttttt"),
+                new Diary(3, new Date().getTime(), "Contentttttttttt") };
         mDiaryAdapter.setDiaryData(diaryData);
     }
 
