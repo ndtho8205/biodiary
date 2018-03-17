@@ -10,28 +10,28 @@ import edu.bk.thesis.biodiary.R;
 import edu.bk.thesis.biodiary.models.Diary;
 
 
-public class DiaryDetailActivity extends AppCompatActivity
+public class EntryDetailActivity extends AppCompatActivity
 {
     private TextView mDetailTimestamp;
     private TextView mDetailContent;
 
-    private Diary mDiary;
+    private Diary.Entry mEntry;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_diary_detail);
+        setContentView(R.layout.activity_entry_detail);
 
-        mDetailTimestamp = findViewById(R.id.tv_diary_detail_timestamp);
-        mDetailContent = findViewById(R.id.tv_diary_detail_content);
+        mDetailTimestamp = findViewById(R.id.tv_entry_detail_timestamp);
+        mDetailContent = findViewById(R.id.tv_entry_detail_content);
 
         Intent intent = getIntent();
         if (intent != null) {
             if (intent.hasExtra(Intent.EXTRA_TEXT)) {
-                mDiary = (Diary) intent.getSerializableExtra(Intent.EXTRA_TEXT);
-                mDetailTimestamp.setText(mDiary.getDateInString());
-                mDetailContent.setText(mDiary.getContent());
+                mEntry = (Diary.Entry) intent.getSerializableExtra(Intent.EXTRA_TEXT);
+                mDetailTimestamp.setText(mEntry.getDateInString());
+                mDetailContent.setText(mEntry.getContent());
             }
         }
 

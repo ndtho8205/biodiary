@@ -3,6 +3,7 @@ package edu.bk.thesis.biodiary.models;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 
@@ -19,58 +20,80 @@ public class Diary implements Serializable
             + COLUMN_TIMESTAMP + " INTEGER,"
             + COLUMN_CONTENT + " TEXT,"
             + ")";
-    private int    mId;
-    private long   mTimestamp;
-    private String mContent;
 
-    public Diary(int id, long timestamp, String content)
+    private List<Entry> mEntryList;
+
+    public Diary(List<Entry> entryList)
     {
-        mId = id;
-        mTimestamp = timestamp;
-        mContent = content;
+        mEntryList = entryList;
     }
 
-    public int getId()
+    public List<Entry> getEntryList()
     {
-        return mId;
+        return mEntryList;
     }
 
-    public long getTimestamp()
+    public void setEntryList(List<Entry> entryList)
     {
-        return mTimestamp;
+        mEntryList = entryList;
     }
 
-    public void setTimestamp(long timestamp)
-    {
-        mTimestamp = timestamp;
-    }
 
-    public String getContent()
+    public static class Entry implements Serializable
     {
-        return mContent;
-    }
+        private int    mId;
+        private long   mTimestamp;
+        private String mContent;
 
-    public void setContent(String content)
-    {
-        mContent = content;
-    }
+        public Entry(int id, long timestamp, String content)
+        {
+            mId = id;
+            mTimestamp = timestamp;
+            mContent = content;
+        }
 
-    public Date getDate()
-    {
-        return new Date(mTimestamp);
-    }
+        public int getId()
+        {
+            return mId;
+        }
 
-    public String getDateInString()
-    {
-        SimpleDateFormat df = new SimpleDateFormat("dd/MM/YYYY HH:mm:ss", Locale.US);
-        return df.format(getDate());
-    }
+        public long getTimestamp()
+        {
+            return mTimestamp;
+        }
 
-    public String getShortContent(int wordLength)
-    {
-        //TODO: implement get substring by word, instead of characters.
-        return wordLength > mContent.length()
-               ? mContent
-               : mContent.substring(0, wordLength) + "...";
+        public void setTimestamp(long timestamp)
+        {
+            mTimestamp = timestamp;
+        }
+
+        public String getContent()
+        {
+            return mContent;
+        }
+
+        public void setContent(String content)
+        {
+            mContent = content;
+        }
+
+        public Date getDate()
+        {
+            return new Date(mTimestamp);
+        }
+
+        public String getDateInString()
+        {
+            SimpleDateFormat df = new SimpleDateFormat("dd/MM/YYYY HH:mm:ss", Locale.US);
+            return df.format(getDate());
+        }
+
+        public String getShortContent(int wordLength)
+        {
+            //TODO: implement get substring by word, instead of characters.
+            return wordLength > mContent.length()
+                   ? mContent
+                   : mContent.substring(0, wordLength) + "...";
+        }
     }
 }
