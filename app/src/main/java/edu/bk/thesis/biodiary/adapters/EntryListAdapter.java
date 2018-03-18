@@ -3,7 +3,6 @@ package edu.bk.thesis.biodiary.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,9 +39,6 @@ public class EntryListAdapter
     {
         Diary.Entry entry = mEntryList.get(position);
 
-
-        holder.mDot.setText(Html.fromHtml("&#8226;"));
-
         holder.mTimestamp.setText(entry.getDateInString());
 
         holder.mContent.setText(entry.getShortContent(200));
@@ -70,7 +66,6 @@ public class EntryListAdapter
 
     class EntryListAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {
-        final TextView mDot;
         final TextView mTimestamp;
         final TextView mContent;
 
@@ -78,7 +73,6 @@ public class EntryListAdapter
         {
             super(view);
 
-            mDot = view.findViewById(R.id.tv_entry_dot);
             mTimestamp = view.findViewById(R.id.tv_entry_timestamp);
             mContent = view.findViewById(R.id.tv_entry_content);
 
