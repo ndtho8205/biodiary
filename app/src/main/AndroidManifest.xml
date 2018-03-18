@@ -25,7 +25,11 @@
             android:name=".activities.EntryDetailActivity"
             android:parentActivityName=".activities.BioDiaryMainActivity"
             tools:targetApi="jelly_bean" />
-        <activity android:name=".activities.EntryEditorActivity"></activity>
+        <activity
+            android:name=".activities.EntryEditorActivity"
+            android:label="New entry"
+            android:parentActivityName=".activities.BioDiaryMainActivity"
+            tools:targetApi="jelly_bean" />
     </application>
 
 </manifest>
