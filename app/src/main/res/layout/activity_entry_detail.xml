@@ -11,12 +11,17 @@
         android:id="@+id/tv_entry_detail_timestamp"
         style="@style/EntryDateTextViewTheme"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp" />
-
-    <TextView
-        android:id="@+id/tv_entry_detail_content"
-        style="@style/EntryContentTextViewTheme"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="8dp">
+
+        <TextView
+            android:id="@+id/tv_entry_detail_content"
+            style="@style/EntryContentTextViewTheme"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </ScrollView>
 </LinearLayout>

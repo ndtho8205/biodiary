@@ -22,6 +22,7 @@
             android:src="@drawable/ic_more_vert" />
 
         <EditText
+            android:id="@+id/et_entry_date"
             style="@style/EntryDateEditTextTheme"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -50,6 +51,7 @@
             android:paddingTop="8dp">
 
             <EditText
+                android:id="@+id/et_entry_content"
                 style="@style/EntryContentEditTextTheme"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -25,6 +25,8 @@ import edu.bk.thesis.biodiary.utils.DividerItemDecoration;
 public class BioDiaryMainActivity extends AppCompatActivity
         implements EntryListAdapter.DiaryAdapterOnClickHandler
 {
+    static final int NEW_ENTRY_REQUEST = 1;
+
     private FloatingActionButton mNewEntryButton;
     private RecyclerView         mEntryList;
     private EntryListAdapter     mEntryListAdapter;
@@ -42,9 +44,7 @@ public class BioDiaryMainActivity extends AppCompatActivity
             @Override
             public void onClick(View view)
             {
-                Intent intentToStartNewEntryActivity = new Intent(BioDiaryMainActivity.this,
-                                                                  EntryEditorActivity.class);
-                startActivity(intentToStartNewEntryActivity);
+                startActivityForNewEntry();
             }
         });
 
@@ -85,11 +85,22 @@ public class BioDiaryMainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == NEW_ENTRY_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                Diary.Entry newEntry = (Diary.Entry) data.getSerializableExtra(Intent.EXTRA_TEXT);
+
+                System.out.println(newEntry);
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
     public void onClick(Diary.Entry entry)
     {
-        Intent intentToStartEntryDetailActivity = new Intent(this, EntryDetailActivity.class);
-        intentToStartEntryDetailActivity.putExtra(Intent.EXTRA_TEXT, entry);
-        startActivity(intentToStartEntryDetailActivity);
+        startActivityForEntryDetail(entry);
     }
 
     private void initializeDiaryData()
@@ -128,5 +139,19 @@ public class BioDiaryMainActivity extends AppCompatActivity
                                       "Nullam eget luctus erat, id elementum urna. Praesent tristique feugiat nibh eget molestie. Suspendisse potenti. Duis tincidunt id tortor quis hendrerit. Nullam molestie et velit a pellentesque. In hac habitasse platea dictumst. Praesent in mauris quis massa fringilla suscipit. Nunc a dignissim nunc. Duis eleifend ipsum quam, ac interdum sapien consequat sed. Praesent cursus consectetur risus ac blandit. Morbi vestibulum dapibus dui, nec dignissim orci dignissim eget. Suspendisse potenti."));
 
         mEntryListAdapter.setEntryList(new Diary(entryList));
+    }
+
+    private void startActivityForNewEntry()
+    {
+        Intent intentToStartEntryEditorActivity = new Intent(BioDiaryMainActivity.this,
+                                                             EntryEditorActivity.class);
+        startActivityForResult(intentToStartEntryEditorActivity, NEW_ENTRY_REQUEST);
+    }
+
+    private void startActivityForEntryDetail(Diary.Entry entry)
+    {
+        Intent intentToStartEntryDetailActivity = new Intent(this, EntryDetailActivity.class);
+        intentToStartEntryDetailActivity.putExtra(Intent.EXTRA_TEXT, entry);
+        startActivity(intentToStartEntryDetailActivity);
     }
 }
