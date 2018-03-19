@@ -17,7 +17,6 @@ import edu.bk.thesis.biodiary.R;
 import edu.bk.thesis.biodiary.adapters.EntryListAdapter;
 import edu.bk.thesis.biodiary.handlers.DatabaseHandler;
 import edu.bk.thesis.biodiary.models.Diary;
-import edu.bk.thesis.biodiary.utils.DividerItemDecoration;
 
 
 public class BioDiaryMainActivity extends AppCompatActivity
@@ -59,7 +58,7 @@ public class BioDiaryMainActivity extends AppCompatActivity
                                                                     false);
         mEntryList.setLayoutManager(layoutManager);
         mEntryList.setItemAnimator(new DefaultItemAnimator());
-        mEntryList.addItemDecoration(new DividerItemDecoration(this, 16));
+        // mEntryList.addItemDecoration(new DividerItemDecoration(this, 16));
         mEntryList.setHasFixedSize(true);
         mEntryListAdapter = new EntryListAdapter(this);
         mEntryList.setAdapter(mEntryListAdapter);
@@ -92,7 +91,7 @@ public class BioDiaryMainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu)
     {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.biodiary_main_activity_actions, menu);
+        inflater.inflate(R.menu.menu_main, menu);
         return true;
     }
 

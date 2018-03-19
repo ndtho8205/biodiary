@@ -5,4 +5,6 @@
     <string name="what_s_on_your_mind">What\'s on your mind?</string>
     <string name="date">date</string>
     <string name="no_entry_found">No entry found!</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_delete">Delete</string>
 </resources>
