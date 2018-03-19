@@ -51,7 +51,7 @@ public class EntryListAdapter
         return mDiary.getEntryList().size();
     }
 
-    public void setEntryList(Diary diary)
+    public void setDiary(Diary diary)
     {
         mDiary = diary;
         notifyDataSetChanged();

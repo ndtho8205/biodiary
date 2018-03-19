@@ -46,16 +46,6 @@ public class EntryEditorActivity extends AppCompatActivity
         }
     }
 
-    private void returnNewEntry()
-    {
-        Intent result = new Intent();
-        result.putExtra(Intent.EXTRA_TEXT,
-                        new Diary.Entry(mEntryDate.getText().toString(),
-                                        mEntryContent.getText().toString()));
-        setResult(Activity.RESULT_OK, result);
-        finish();
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
@@ -68,5 +58,20 @@ public class EntryEditorActivity extends AppCompatActivity
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void returnNewEntry()
+    {
+        if (mEntryContent.getText().toString().trim().isEmpty()) {
+            setResult(Activity.RESULT_CANCELED);
+        }
+        else {
+            Intent result = new Intent();
+            result.putExtra(Intent.EXTRA_TEXT,
+                            new Diary.Entry(mEntryDate.getText().toString(),
+                                            mEntryContent.getText().toString()));
+            setResult(Activity.RESULT_OK, result);
+        }
+        finish();
     }
 }

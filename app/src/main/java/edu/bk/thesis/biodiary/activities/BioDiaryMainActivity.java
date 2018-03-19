@@ -11,13 +11,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import android.widget.TextView;
 
 import edu.bk.thesis.biodiary.R;
 import edu.bk.thesis.biodiary.adapters.EntryListAdapter;
+import edu.bk.thesis.biodiary.handlers.DatabaseHandler;
 import edu.bk.thesis.biodiary.models.Diary;
 import edu.bk.thesis.biodiary.utils.DividerItemDecoration;
 
@@ -29,13 +27,19 @@ public class BioDiaryMainActivity extends AppCompatActivity
 
     private FloatingActionButton mNewEntryButton;
     private RecyclerView         mEntryList;
+    private TextView             mEmptyDiaryNotify;
     private EntryListAdapter     mEntryListAdapter;
+    private Diary                mDiary;
+    private DatabaseHandler      mDatabaseHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_biodiary_main);
+
+        // emptyDiaryNotify
+        mEmptyDiaryNotify = findViewById(R.id.tv_empty_diary);
 
         // newEntryButton
         mNewEntryButton = findViewById(R.id.fab_new_entry);
@@ -60,9 +64,29 @@ public class BioDiaryMainActivity extends AppCompatActivity
         mEntryListAdapter = new EntryListAdapter(this);
         mEntryList.setAdapter(mEntryListAdapter);
 
-        initializeDiaryData();
+        // init
+        mDatabaseHandler = new DatabaseHandler(this);
+        mDiary = new Diary(mDatabaseHandler.getAllEntries());
+        mEntryListAdapter.setDiary(mDiary);
+        toggleEmptyDiary();
     }
 
+    private void startActivityForNewEntry()
+    {
+        Intent intentToStartEntryEditorActivity = new Intent(BioDiaryMainActivity.this,
+                                                             EntryEditorActivity.class);
+        startActivityForResult(intentToStartEntryEditorActivity, NEW_ENTRY_REQUEST);
+    }
+
+    private void toggleEmptyDiary()
+    {
+        if (mDiary.getEntryList().size() > 0) {
+            mEmptyDiaryNotify.setVisibility(View.GONE);
+        }
+        else {
+            mEmptyDiaryNotify.setVisibility(View.VISIBLE);
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
@@ -90,62 +114,29 @@ public class BioDiaryMainActivity extends AppCompatActivity
         if (requestCode == NEW_ENTRY_REQUEST) {
             if (resultCode == RESULT_OK) {
                 Diary.Entry newEntry = (Diary.Entry) data.getSerializableExtra(Intent.EXTRA_TEXT);
-
-                System.out.println(newEntry);
+                handleNewEntryCreated(newEntry);
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void handleNewEntryCreated(Diary.Entry entry)
+    {
+        long        id                = mDatabaseHandler.insertEntry(entry);
+        Diary.Entry entryFromDatabase = mDatabaseHandler.getEntry(id);
+
+        if (entryFromDatabase != null) {
+            mDiary.getEntryList().add(0, entryFromDatabase);
+            mEntryListAdapter.notifyDataSetChanged();
+
+            toggleEmptyDiary();
+        }
     }
 
     @Override
     public void onClick(Diary.Entry entry)
     {
         startActivityForEntryDetail(entry);
-    }
-
-    private void initializeDiaryData()
-    {
-        List<Diary.Entry> entryList = new ArrayList<>();
-
-        entryList.add(new Diary.Entry(1,
-                                      new Date().getTime(),
-                                      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi lobortis risus in rutrum scelerisque. Sed bibendum lacus et quam blandit, nec feugiat neque porta. In lacinia viverra efficitur. Cras aliquet nulla non lacus hendrerit, id mattis enim ultrices. Cras fermentum vitae sapien ut imperdiet. Nulla eu imperdiet massa. Aenean in velit vel urna vulputate porta ornare eu lorem. Morbi eu maximus odio. Ut quis tortor quis ex dictum viverra nec nec nisi. Phasellus ac placerat mauris, at facilisis risus. Sed luctus volutpat felis. Donec dignissim luctus auctor. Nulla fringilla vulputate erat, pulvinar bibendum lectus ultrices eget."));
-        entryList.add(new Diary.Entry(2,
-                                      new Date().getTime(),
-                                      "Phasellus nec nisl vitae tellus sollicitudin facilisis eu sit amet velit. Curabitur ultricies viverra nunc, sit amet vestibulum metus tristique id. Sed sed lectus malesuada, venenatis sapien ac, fringilla lorem. Praesent efficitur erat sed lacus tempor, eget commodo felis euismod. Vestibulum dapibus ante sed lorem convallis iaculis. Nulla aliquam ligula elementum velit scelerisque scelerisque. Suspendisse ac velit nunc. Aliquam erat volutpat. Fusce dignissim quam at tortor malesuada sollicitudin. Etiam sollicitudin laoreet dignissim. Cras mollis aliquet ante, semper commodo eros dictum vel. Quisque id posuere odio, vel fringilla magna."));
-        entryList.add(new Diary.Entry(3,
-                                      new Date().getTime(),
-                                      "Nullam eget luctus erat, id elementum urna. Praesent tristique feugiat nibh eget molestie. Suspendisse potenti. Duis tincidunt id tortor quis hendrerit. Nullam molestie et velit a pellentesque. In hac habitasse platea dictumst. Praesent in mauris quis massa fringilla suscipit. Nunc a dignissim nunc. Duis eleifend ipsum quam, ac interdum sapien consequat sed. Praesent cursus consectetur risus ac blandit. Morbi vestibulum dapibus dui, nec dignissim orci dignissim eget. Suspendisse potenti."));
-        entryList.add(new Diary.Entry(4,
-                                      new Date().getTime(),
-                                      "Nullam eget luctus erat, id elementum urna. Praesent tristique feugiat nibh eget molestie. Suspendisse potenti. Duis tincidunt id tortor quis hendrerit. Nullam molestie et velit a pellentesque. In hac habitasse platea dictumst. Praesent in mauris quis massa fringilla suscipit. Nunc a dignissim nunc. Duis eleifend ipsum quam, ac interdum sapien consequat sed. Praesent cursus consectetur risus ac blandit. Morbi vestibulum dapibus dui, nec dignissim orci dignissim eget. Suspendisse potenti."));
-        entryList.add(new Diary.Entry(5,
-                                      new Date().getTime(),
-                                      "Nullam eget luctus erat, id elementum urna. Praesent tristique feugiat nibh eget molestie. Suspendisse potenti. Duis tincidunt id tortor quis hendrerit. Nullam molestie et velit a pellentesque. In hac habitasse platea dictumst. Praesent in mauris quis massa fringilla suscipit. Nunc a dignissim nunc. Duis eleifend ipsum quam, ac interdum sapien consequat sed. Praesent cursus consectetur risus ac blandit. Morbi vestibulum dapibus dui, nec dignissim orci dignissim eget. Suspendisse potenti."));
-        entryList.add(new Diary.Entry(6,
-                                      new Date().getTime(),
-                                      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi lobortis risus in rutrum scelerisque. Sed bibendum lacus et quam blandit, nec feugiat neque porta. In lacinia viverra efficitur. Cras aliquet nulla non lacus hendrerit, id mattis enim ultrices. Cras fermentum vitae sapien ut imperdiet. Nulla eu imperdiet massa. Aenean in velit vel urna vulputate porta ornare eu lorem. Morbi eu maximus odio. Ut quis tortor quis ex dictum viverra nec nec nisi. Phasellus ac placerat mauris, at facilisis risus. Sed luctus volutpat felis. Donec dignissim luctus auctor. Nulla fringilla vulputate erat, pulvinar bibendum lectus ultrices eget."));
-        entryList.add(new Diary.Entry(7,
-                                      new Date().getTime(),
-                                      "Phasellus nec nisl vitae tellus sollicitudin facilisis eu sit amet velit. Curabitur ultricies viverra nunc, sit amet vestibulum metus tristique id. Sed sed lectus malesuada, venenatis sapien ac, fringilla lorem. Praesent efficitur erat sed lacus tempor, eget commodo felis euismod. Vestibulum dapibus ante sed lorem convallis iaculis. Nulla aliquam ligula elementum velit scelerisque scelerisque. Suspendisse ac velit nunc. Aliquam erat volutpat. Fusce dignissim quam at tortor malesuada sollicitudin. Etiam sollicitudin laoreet dignissim. Cras mollis aliquet ante, semper commodo eros dictum vel. Quisque id posuere odio, vel fringilla magna."));
-        entryList.add(new Diary.Entry(8,
-                                      new Date().getTime(),
-                                      "Nullam eget luctus erat, id elementum urna. Praesent tristique feugiat nibh eget molestie. Suspendisse potenti. Duis tincidunt id tortor quis hendrerit. Nullam molestie et velit a pellentesque. In hac habitasse platea dictumst. Praesent in mauris quis massa fringilla suscipit. Nunc a dignissim nunc. Duis eleifend ipsum quam, ac interdum sapien consequat sed. Praesent cursus consectetur risus ac blandit. Morbi vestibulum dapibus dui, nec dignissim orci dignissim eget. Suspendisse potenti."));
-        entryList.add(new Diary.Entry(9,
-                                      new Date().getTime(),
-                                      "Nullam eget luctus erat, id elementum urna. Praesent tristique feugiat nibh eget molestie. Suspendisse potenti. Duis tincidunt id tortor quis hendrerit. Nullam molestie et velit a pellentesque. In hac habitasse platea dictumst. Praesent in mauris quis massa fringilla suscipit. Nunc a dignissim nunc. Duis eleifend ipsum quam, ac interdum sapien consequat sed. Praesent cursus consectetur risus ac blandit. Morbi vestibulum dapibus dui, nec dignissim orci dignissim eget. Suspendisse potenti."));
-        entryList.add(new Diary.Entry(10,
-                                      new Date().getTime(),
-                                      "Nullam eget luctus erat, id elementum urna. Praesent tristique feugiat nibh eget molestie. Suspendisse potenti. Duis tincidunt id tortor quis hendrerit. Nullam molestie et velit a pellentesque. In hac habitasse platea dictumst. Praesent in mauris quis massa fringilla suscipit. Nunc a dignissim nunc. Duis eleifend ipsum quam, ac interdum sapien consequat sed. Praesent cursus consectetur risus ac blandit. Morbi vestibulum dapibus dui, nec dignissim orci dignissim eget. Suspendisse potenti."));
-
-        mEntryListAdapter.setEntryList(new Diary(entryList));
-    }
-
-    private void startActivityForNewEntry()
-    {
-        Intent intentToStartEntryEditorActivity = new Intent(BioDiaryMainActivity.this,
-                                                             EntryEditorActivity.class);
-        startActivityForResult(intentToStartEntryEditorActivity, NEW_ENTRY_REQUEST);
     }
 
     private void startActivityForEntryDetail(Diary.Entry entry)

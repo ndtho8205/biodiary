@@ -19,7 +19,7 @@ public class Diary implements Serializable
             "CREATE TABLE " + TABLE_NAME + "("
             + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
             + COLUMN_TIMESTAMP + " INTEGER,"
-            + COLUMN_CONTENT + " TEXT,"
+            + COLUMN_CONTENT + " TEXT"
             + ")";
 
     private List<Entry> mEntryList;
@@ -47,7 +47,7 @@ public class Diary implements Serializable
 
     public static class Entry implements Serializable
     {
-        private int    mId;
+        private long   mId;
         private long   mTimestamp;
         private String mDate;
         private String mContent;
@@ -60,14 +60,14 @@ public class Diary implements Serializable
             mContent = content;
         }
 
-        public Entry(int id, long timestamp, String content)
+        public Entry(long id, long timestamp, String content)
         {
             mId = id;
             mTimestamp = timestamp;
             mContent = content;
         }
 
-        public int getId()
+        public long getId()
         {
             return mId;
         }
@@ -92,15 +92,15 @@ public class Diary implements Serializable
             mContent = content;
         }
 
-        public Date getDate()
-        {
-            return new Date(mTimestamp);
-        }
-
         public String getDateInString()
         {
             SimpleDateFormat df = new SimpleDateFormat("dd/MM/YYYY HH:mm:ss", Locale.US);
             return df.format(getDate());
+        }
+
+        public Date getDate()
+        {
+            return new Date(mTimestamp);
         }
 
         public String getShortContent(int wordLength)

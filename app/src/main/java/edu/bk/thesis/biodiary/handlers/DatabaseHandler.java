@@ -17,25 +17,9 @@ public class DatabaseHandler extends SQLiteOpenHelper
     private static final int    DATABASE_VERSION = 1;
     private static final String DATABASE_NAME    = "biodiaryDB.db";
 
-    public DatabaseHandler(Context context,
-                           String name,
-                           SQLiteDatabase.CursorFactory factory, int version)
+    public DatabaseHandler(Context context)
     {
-        super(context, DATABASE_NAME, factory, DATABASE_VERSION);
-    }
-
-
-    @Override
-    public void onCreate(SQLiteDatabase db)
-    {
-        db.execSQL(Diary.CREATE_TABLE);
-    }
-
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int i, int i1)
-    {
-        db.execSQL("DROP TABLE IF EXISTS " + Diary.TABLE_NAME);
-        onCreate(db);
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     public long insertEntry(Diary.Entry entry)
@@ -53,7 +37,7 @@ public class DatabaseHandler extends SQLiteOpenHelper
         return id;
     }
 
-    public Diary.Entry getEntry(int id)
+    public Diary.Entry getEntry(long id)
     {
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -69,7 +53,7 @@ public class DatabaseHandler extends SQLiteOpenHelper
 
         Diary.Entry entry = null;
         if (cursor != null && cursor.moveToFirst()) {
-            entry = new Diary.Entry(cursor.getInt(cursor.getColumnIndex(Diary.COLUMN_ID)),
+            entry = new Diary.Entry(cursor.getLong(cursor.getColumnIndex(Diary.COLUMN_ID)),
                                     cursor.getLong(cursor.getColumnIndex(Diary.COLUMN_TIMESTAMP)),
                                     cursor.getString(cursor.getColumnIndex(Diary.COLUMN_CONTENT)));
             cursor.close();
@@ -95,7 +79,7 @@ public class DatabaseHandler extends SQLiteOpenHelper
         if (cursor.moveToFirst()) {
             do {
                 Diary.Entry entry
-                        = new Diary.Entry(cursor.getInt(cursor.getColumnIndex(Diary.COLUMN_ID)),
+                        = new Diary.Entry(cursor.getLong(cursor.getColumnIndex(Diary.COLUMN_ID)),
                                           cursor.getLong(cursor.getColumnIndex(Diary.COLUMN_TIMESTAMP)),
                                           cursor.getString(cursor.getColumnIndex(Diary.COLUMN_CONTENT)));
                 entries.add(entry);
@@ -106,16 +90,20 @@ public class DatabaseHandler extends SQLiteOpenHelper
         db.close();
 
         return entries;
+    }    @Override
+    public void onCreate(SQLiteDatabase db)
+    {
+        db.execSQL(Diary.CREATE_TABLE);
     }
 
-    public int getEntriesCount()
+    public long getEntriesCount()
     {
         String countQuery = "SELECT  * FROM " + Diary.TABLE_NAME;
 
         SQLiteDatabase db     = this.getReadableDatabase();
         Cursor         cursor = db.rawQuery(countQuery, null);
 
-        int count = cursor.getCount();
+        long count = cursor.getCount();
 
         cursor.close();
         db.close();
@@ -123,7 +111,7 @@ public class DatabaseHandler extends SQLiteOpenHelper
         return count;
     }
 
-    public int updateEntry(Diary.Entry entry)
+    public long updateEntry(Diary.Entry entry)
     {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -142,5 +130,16 @@ public class DatabaseHandler extends SQLiteOpenHelper
                   new String[]{ String.valueOf(entry.getId()) });
 
         db.close();
+    }    @Override
+    public void onUpgrade(SQLiteDatabase db, int i, int i1)
+    {
+        db.execSQL("DROP TABLE IF EXISTS " + Diary.TABLE_NAME);
+        onCreate(db);
     }
+
+
+
+
+
+
 }
