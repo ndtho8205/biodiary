@@ -32,6 +32,39 @@ public class BioDiaryMainActivity extends AppCompatActivity
     private DatabaseHandler      mDatabaseHandler;
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                System.out.println("Action: Settings");
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onClick(Diary.Entry entry)
+    {
+        startActivityForEntryDetail(entry);
+    }
+
+    private void startActivityForEntryDetail(Diary.Entry entry)
+    {
+        Intent intentToStartEntryDetailActivity = new Intent(this, EntryDetailActivity.class);
+        intentToStartEntryDetailActivity.putExtra(Intent.EXTRA_TEXT, entry);
+        startActivity(intentToStartEntryDetailActivity);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
@@ -88,26 +121,6 @@ public class BioDiaryMainActivity extends AppCompatActivity
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        switch (item.getItemId()) {
-            case R.id.action_settings:
-                System.out.println("Action: Settings");
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         if (requestCode == NEW_ENTRY_REQUEST) {
@@ -130,18 +143,5 @@ public class BioDiaryMainActivity extends AppCompatActivity
 
             toggleEmptyDiary();
         }
-    }
-
-    @Override
-    public void onClick(Diary.Entry entry)
-    {
-        startActivityForEntryDetail(entry);
-    }
-
-    private void startActivityForEntryDetail(Diary.Entry entry)
-    {
-        Intent intentToStartEntryDetailActivity = new Intent(this, EntryDetailActivity.class);
-        intentToStartEntryDetailActivity.putExtra(Intent.EXTRA_TEXT, entry);
-        startActivity(intentToStartEntryDetailActivity);
     }
 }

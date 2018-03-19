@@ -7,4 +7,7 @@
     <string name="no_entry_found">No entry found!</string>
     <string name="action_edit">Edit</string>
     <string name="action_delete">Delete</string>
+    <string name="set_up_biodiary">Set Up BioDiary</string>
+    <string name="done">DONE</string>
+    <string name="login">Login</string>
 </resources>
