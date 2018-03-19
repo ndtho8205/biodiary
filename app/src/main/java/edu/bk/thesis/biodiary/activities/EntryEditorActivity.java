@@ -49,7 +49,9 @@ public class EntryEditorActivity extends AppCompatActivity
     private void returnNewEntry()
     {
         Intent result = new Intent();
-        getIntent().putExtra(Intent.EXTRA_TEXT, mEntry);
+        result.putExtra(Intent.EXTRA_TEXT,
+                        new Diary.Entry(mEntryDate.getText().toString(),
+                                        mEntryContent.getText().toString()));
         setResult(Activity.RESULT_OK, result);
         finish();
     }

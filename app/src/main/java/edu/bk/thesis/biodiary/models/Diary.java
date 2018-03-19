@@ -49,7 +49,16 @@ public class Diary implements Serializable
     {
         private int    mId;
         private long   mTimestamp;
+        private String mDate;
         private String mContent;
+
+
+        public Entry(String date, String content)
+        {
+            mTimestamp = new Date().getTime();
+            mDate = date;
+            mContent = content;
+        }
 
         public Entry(int id, long timestamp, String content)
         {
