@@ -2,6 +2,7 @@ package edu.bk.thesis.biodiary.models;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -22,6 +23,11 @@ public class Diary implements Serializable
             + ")";
 
     private List<Entry> mEntryList;
+
+    public Diary()
+    {
+        mEntryList = new ArrayList<>();
+    }
 
     public Diary(List<Entry> entryList)
     {

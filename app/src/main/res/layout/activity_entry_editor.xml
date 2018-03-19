@@ -4,20 +4,32 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:padding="8dp"
     tools:context="edu.bk.thesis.biodiary.activities.EntryEditorActivity">
 
-    <EditText
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:inputType="text"
-        android:padding="8dp"
-        android:singleLine="true" />
+        android:layout_marginBottom="8dp"
+        android:orientation="horizontal">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/colorDivider" />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/quote"
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp"
+            android:src="@drawable/ic_more_vert" />
+
+        <EditText
+            style="@style/EntryDateEditTextTheme"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:background="@android:color/transparent"
+            android:inputType="text"
+            android:singleLine="true" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -28,7 +40,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/quote"
-            android:padding="8dp"
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp"
             android:src="@drawable/ic_more_vert" />
 
         <ScrollView
@@ -37,6 +50,7 @@
             android:paddingTop="8dp">
 
             <EditText
+                style="@style/EntryContentEditTextTheme"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"

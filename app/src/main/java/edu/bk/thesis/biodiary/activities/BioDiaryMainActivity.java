@@ -127,6 +127,6 @@ public class BioDiaryMainActivity extends AppCompatActivity
                                       new Date().getTime(),
                                       "Nullam eget luctus erat, id elementum urna. Praesent tristique feugiat nibh eget molestie. Suspendisse potenti. Duis tincidunt id tortor quis hendrerit. Nullam molestie et velit a pellentesque. In hac habitasse platea dictumst. Praesent in mauris quis massa fringilla suscipit. Nunc a dignissim nunc. Duis eleifend ipsum quam, ac interdum sapien consequat sed. Praesent cursus consectetur risus ac blandit. Morbi vestibulum dapibus dui, nec dignissim orci dignissim eget. Suspendisse potenti."));
 
-        mEntryListAdapter.setEntryList(entryList);
+        mEntryListAdapter.setEntryList(new Diary(entryList));
     }
 }

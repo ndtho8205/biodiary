@@ -8,8 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.List;
-
 import edu.bk.thesis.biodiary.R;
 import edu.bk.thesis.biodiary.models.Diary;
 
@@ -18,7 +16,7 @@ public class EntryListAdapter
         extends RecyclerView.Adapter<EntryListAdapter.EntryListAdapterViewHolder>
 {
     private final DiaryAdapterOnClickHandler mClickHandler;
-    private       List<Diary.Entry>          mEntryList;
+    private       Diary                      mDiary;
 
     public EntryListAdapter(DiaryAdapterOnClickHandler clickHandler)
     {
@@ -37,7 +35,7 @@ public class EntryListAdapter
     @Override
     public void onBindViewHolder(EntryListAdapterViewHolder holder, int position)
     {
-        Diary.Entry entry = mEntryList.get(position);
+        Diary.Entry entry = mDiary.getEntryList().get(position);
 
         holder.mTimestamp.setText(entry.getDateInString());
 
@@ -47,15 +45,15 @@ public class EntryListAdapter
     @Override
     public int getItemCount()
     {
-        if (mEntryList == null) {
+        if (mDiary == null) {
             return 0;
         }
-        return mEntryList.size();
+        return mDiary.getEntryList().size();
     }
 
-    public void setEntryList(List<Diary.Entry> entryList)
+    public void setEntryList(Diary diary)
     {
-        mEntryList = entryList;
+        mDiary = diary;
         notifyDataSetChanged();
     }
 
@@ -83,7 +81,7 @@ public class EntryListAdapter
         public void onClick(View v)
         {
             int         adapterPosition = getAdapterPosition();
-            Diary.Entry entry           = mEntryList.get(adapterPosition);
+            Diary.Entry entry           = mDiary.getEntryList().get(adapterPosition);
             mClickHandler.onClick(entry);
         }
     }

@@ -11,4 +11,30 @@
     <style name="SplashScreenTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowBackground">@drawable/bg_splashscreen</item>
     </style>
+
+    <style name="EntryDateTextViewTheme" parent="Widget.AppCompat.TextView.SpinnerItem">
+        <item name="android:fontFamily">serif</item>
+        <item name="android:textColor">@color/colorEntryDate</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="EntryContentTextViewTheme" parent="Widget.AppCompat.TextView.SpinnerItem">
+        <item name="android:fontFamily">@font/roboto_light</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:lineSpacingExtra">5dp</item>
+    </style>
+
+    <style name="EntryDateEditTextTheme" parent="Widget.AppCompat.EditText">
+        <item name="android:fontFamily">serif</item>
+        <item name="android:textColor">@color/colorEntryDate</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="EntryContentEditTextTheme" parent="Widget.AppCompat.EditText">
+        <item name="android:fontFamily">@font/roboto_light</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:lineSpacingExtra">5dp</item>
+    </style>
 </resources>
