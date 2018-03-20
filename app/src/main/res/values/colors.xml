@@ -11,4 +11,6 @@
 
     <color name="colorSplashScreenBackground">#D8D8D8</color>
     <color name="colorEntryDate">#009688</color>
+
+    <color name="colorCardBackground">#aa00ff</color>
 </resources>

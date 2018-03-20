@@ -1,16 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="edu.bk.thesis.biodiary.activities.EntryEditorActivity">
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/editor_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:gravity="start"
+        app:contentInsetLeft="0dp"
+        app:contentInsetStart="0dp">
+
+        <android.support.v7.widget.ActionMenuView
+            android:id="@+id/editor_toolbar_amv"
+            android:layout_width="wrap_content"
+            android:layout_height="?attr/actionBarSize" />
+    </android.support.v7.widget.Toolbar>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:orientation="horizontal">
 
@@ -24,7 +40,7 @@
 
         <EditText
             android:id="@+id/et_entry_date"
-            style="@style/EntryDateEditTextTheme"
+            style="@style/EntryDateStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -36,7 +52,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="8dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         android:orientation="horizontal">
 
         <ImageView
@@ -54,7 +71,7 @@
 
             <EditText
                 android:id="@+id/et_entry_content"
-                style="@style/EntryContentEditTextTheme"
+                style="@style/EntryContentStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"

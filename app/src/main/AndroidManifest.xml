@@ -26,8 +26,9 @@
             tools:targetApi="jelly_bean" />
         <activity
             android:name=".activities.EntryEditorActivity"
-            android:label="New entry"
+            android:label=""
             android:parentActivityName=".activities.BioDiaryMainActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             tools:targetApi="jelly_bean" />
         <activity android:name=".activities.LoginActivity" />
         <activity android:name=".activities.WelcomeActivity" />
