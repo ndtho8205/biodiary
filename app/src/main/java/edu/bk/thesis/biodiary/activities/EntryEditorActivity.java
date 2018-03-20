@@ -20,33 +20,6 @@ public class EntryEditorActivity extends AppCompatActivity
     private boolean     isNewEntry;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_entry_editor);
-
-        mEntryDate = findViewById(R.id.et_entry_date);
-        mEntryContent = findViewById(R.id.et_entry_content);
-
-        isNewEntry = true;
-
-        Intent intent = getIntent();
-        if (intent != null) {
-            if (intent.hasExtra(Intent.EXTRA_TEXT)) {
-                isNewEntry = false;
-                mEntry = (Diary.Entry) intent.getSerializableExtra(Intent.EXTRA_TEXT);
-                mEntryDate.setText(mEntry.getDateInString());
-                mEntryContent.setText(mEntry.getContent());
-            }
-        }
-
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
         switch (item.getItemId()) {
@@ -73,5 +46,32 @@ public class EntryEditorActivity extends AppCompatActivity
             setResult(Activity.RESULT_OK, result);
         }
         finish();
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_entry_editor);
+
+        mEntryDate = findViewById(R.id.et_entry_date);
+        mEntryContent = findViewById(R.id.et_entry_content);
+
+        isNewEntry = true;
+
+        Intent intent = getIntent();
+        if (intent != null) {
+            if (intent.hasExtra(Intent.EXTRA_TEXT)) {
+                isNewEntry = false;
+                mEntry = (Diary.Entry) intent.getSerializableExtra(Intent.EXTRA_TEXT);
+                mEntryDate.setText(mEntry.getDateInString());
+                mEntryContent.setText(mEntry.getContent());
+            }
+        }
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
     }
 }

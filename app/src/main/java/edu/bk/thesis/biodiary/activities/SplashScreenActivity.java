@@ -22,18 +22,26 @@ public class SplashScreenActivity extends AppCompatActivity
         mPreferencesHandler = new PreferencesHandler(getApplicationContext());
 
         if (!mPreferencesHandler.isSetUp()) {
-            Intent intentToStartWelcomeActivity = new Intent(this, WelcomeActivity.class);
-            // intentToStartWelcomeActivity.addFlags(
-            //         Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-            this.startActivityForResult(intentToStartWelcomeActivity, 10);
+            Intent intentToStartWelcomeActivity = new Intent(getApplicationContext(),
+                                                             WelcomeActivity.class);
+            startActivity(intentToStartWelcomeActivity);
+            finish();
+            return;
         }
-        // mPreferencesHandler.checkLogin();
 
+        if (!mPreferencesHandler.isLoggedIn()) {
+            Intent intentToStartLoginActivity = new Intent(getApplicationContext(),
+                                                           LoginActivity.class);
+            startActivity(intentToStartLoginActivity);
+            finish();
+            return;
+        }
 
-        Intent intent = new Intent(getApplicationContext(), BioDiaryMainActivity.class);
-        // intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(intent);
-        finish();
+        if (mPreferencesHandler.isSetUp() && mPreferencesHandler.isLoggedIn()) {
+            Intent intent = new Intent(getApplicationContext(), BioDiaryMainActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
     @Override

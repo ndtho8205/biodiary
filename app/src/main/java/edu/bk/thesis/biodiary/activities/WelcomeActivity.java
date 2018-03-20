@@ -1,5 +1,6 @@
 package edu.bk.thesis.biodiary.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -29,7 +30,7 @@ public class WelcomeActivity extends AppCompatActivity
             public void onClick(View v)
             {
                 mPreferencesHandler.setUp();
-                
+                startActivity(new Intent(getApplicationContext(), SplashScreenActivity.class));
                 finish();
             }
         });

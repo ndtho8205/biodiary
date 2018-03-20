@@ -90,10 +90,6 @@ public class DatabaseHandler extends SQLiteOpenHelper
         db.close();
 
         return entries;
-    }    @Override
-    public void onCreate(SQLiteDatabase db)
-    {
-        db.execSQL(Diary.CREATE_TABLE);
     }
 
     public long getEntriesCount()
@@ -130,16 +126,18 @@ public class DatabaseHandler extends SQLiteOpenHelper
                   new String[]{ String.valueOf(entry.getId()) });
 
         db.close();
-    }    @Override
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db)
+    {
+        db.execSQL(Diary.CREATE_TABLE);
+    }
+
+    @Override
     public void onUpgrade(SQLiteDatabase db, int i, int i1)
     {
         db.execSQL("DROP TABLE IF EXISTS " + Diary.TABLE_NAME);
         onCreate(db);
     }
-
-
-
-
-
-
 }

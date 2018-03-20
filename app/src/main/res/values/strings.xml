@@ -10,4 +10,6 @@
     <string name="set_up_biodiary">Set Up BioDiary</string>
     <string name="done">DONE</string>
     <string name="login">Login</string>
+    <string name="logout">Logout</string>
+    <string name="reset">Reset</string>
 </resources>

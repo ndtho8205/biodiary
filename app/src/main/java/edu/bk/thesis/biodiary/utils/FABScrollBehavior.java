@@ -18,6 +18,14 @@ public class FABScrollBehavior extends FloatingActionButton.Behavior
     }
 
     @Override
+    public boolean layoutDependsOn(CoordinatorLayout parent,
+                                   FloatingActionButton child,
+                                   View dependency)
+    {
+        return dependency instanceof RecyclerView;
+    }
+
+    @Override
     public boolean onStartNestedScroll(@NonNull CoordinatorLayout coordinatorLayout,
                                        @NonNull FloatingActionButton child,
                                        @NonNull View directTargetChild,
@@ -77,13 +85,5 @@ public class FABScrollBehavior extends FloatingActionButton.Behavior
             child.animate().translationY(0).setInterpolator(new LinearInterpolator()).start();
         }
         */
-    }
-
-    @Override
-    public boolean layoutDependsOn(CoordinatorLayout parent,
-                                   FloatingActionButton child,
-                                   View dependency)
-    {
-        return dependency instanceof RecyclerView;
     }
 }

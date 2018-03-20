@@ -27,21 +27,6 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration
     }
 
     @Override
-    public void getItemOffsets(Rect outRect,
-                               View view,
-                               RecyclerView parent,
-                               RecyclerView.State state)
-    {
-        super.getItemOffsets(outRect, view, parent, state);
-
-        if (parent.getChildAdapterPosition(view) == 0) {
-            return;
-        }
-
-        outRect.top = mDivider.getIntrinsicHeight();
-    }
-
-    @Override
     public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state)
     {
         int left  = parent.getPaddingLeft() + dpToPx(mMargin);
@@ -60,7 +45,21 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration
             mDivider.setBounds(left, top, right, bottom);
             mDivider.draw(c);
         }
+    }
 
+    @Override
+    public void getItemOffsets(Rect outRect,
+                               View view,
+                               RecyclerView parent,
+                               RecyclerView.State state)
+    {
+        super.getItemOffsets(outRect, view, parent, state);
+
+        if (parent.getChildAdapterPosition(view) == 0) {
+            return;
+        }
+
+        outRect.top = mDivider.getIntrinsicHeight();
     }
 
     private int dpToPx(int dp)

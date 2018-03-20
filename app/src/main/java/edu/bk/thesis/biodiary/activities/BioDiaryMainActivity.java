@@ -16,6 +16,7 @@ import android.widget.TextView;
 import edu.bk.thesis.biodiary.R;
 import edu.bk.thesis.biodiary.adapters.EntryListAdapter;
 import edu.bk.thesis.biodiary.handlers.DatabaseHandler;
+import edu.bk.thesis.biodiary.handlers.PreferencesHandler;
 import edu.bk.thesis.biodiary.models.Diary;
 
 
@@ -27,9 +28,12 @@ public class BioDiaryMainActivity extends AppCompatActivity
     private FloatingActionButton mNewEntryButton;
     private RecyclerView         mEntryList;
     private TextView             mEmptyDiaryNotify;
-    private EntryListAdapter     mEntryListAdapter;
-    private Diary                mDiary;
-    private DatabaseHandler      mDatabaseHandler;
+
+    private EntryListAdapter mEntryListAdapter;
+    private Diary            mDiary;
+
+    private DatabaseHandler    mDatabaseHandler;
+    private PreferencesHandler mPreferencesHandler;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
@@ -45,6 +49,18 @@ public class BioDiaryMainActivity extends AppCompatActivity
         switch (item.getItemId()) {
             case R.id.action_settings:
                 System.out.println("Action: Settings");
+                return true;
+            case R.id.action_logout:
+                mPreferencesHandler.logoutUser();
+
+                startActivity(new Intent(this, LoginActivity.class));
+                finish();
+                return true;
+            case R.id.action_reset:
+                mPreferencesHandler.reset();
+
+                startActivity(new Intent(this, SplashScreenActivity.class));
+                finish();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -97,6 +113,7 @@ public class BioDiaryMainActivity extends AppCompatActivity
         mEntryList.setAdapter(mEntryListAdapter);
 
         // init
+        mPreferencesHandler = new PreferencesHandler(getApplicationContext());
         mDatabaseHandler = new DatabaseHandler(this);
         mDiary = new Diary(mDatabaseHandler.getAllEntries());
         mEntryListAdapter.setDiary(mDiary);

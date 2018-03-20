@@ -44,14 +44,12 @@ public class Diary implements Serializable
         mEntryList = entryList;
     }
 
-
     public static class Entry implements Serializable
     {
         private long   mId;
         private long   mTimestamp;
         private String mDate;
         private String mContent;
-
 
         public Entry(String date, String content)
         {
