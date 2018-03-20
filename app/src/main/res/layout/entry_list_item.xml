@@ -7,16 +7,16 @@
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
     card_view:cardCornerRadius="4dp"
-    card_view:cardElevation="2dp">
+    card_view:cardElevation="2dp"
+    card_view:contentPaddingBottom="12dp"
+    card_view:contentPaddingLeft="16dp"
+    card_view:contentPaddingRight="16dp"
+    card_view:contentPaddingTop="12dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipToPadding="false"
-        android:paddingBottom="8dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:paddingTop="8dp"
         android:scrollbars="vertical">
 
         <ImageView
