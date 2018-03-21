@@ -23,7 +23,9 @@ import edu.bk.thesis.biodiary.models.Diary;
 public class BioDiaryMainActivity extends AppCompatActivity
         implements EntryListAdapter.DiaryAdapterOnClickHandler
 {
-    static final int NEW_ENTRY_REQUEST = 1;
+    static final int ENTRY_CREATE_REQUEST = 1;
+    static final int ENTRY_DETAIL_REQUEST = 2;
+    static final int ENTRY_EDIT_REQUEST   = 3;
 
     private FloatingActionButton mNewEntryButton;
     private RecyclerView         mEntryList;
@@ -77,7 +79,7 @@ public class BioDiaryMainActivity extends AppCompatActivity
     {
         Intent intentToStartEntryDetailActivity = new Intent(this, EntryDetailActivity.class);
         intentToStartEntryDetailActivity.putExtra(Intent.EXTRA_TEXT, entry);
-        startActivity(intentToStartEntryDetailActivity);
+        startActivityForResult(intentToStartEntryDetailActivity, ENTRY_DETAIL_REQUEST);
     }
 
     @Override
@@ -124,7 +126,7 @@ public class BioDiaryMainActivity extends AppCompatActivity
     {
         Intent intentToStartEntryEditorActivity = new Intent(BioDiaryMainActivity.this,
                                                              EntryEditorActivity.class);
-        startActivityForResult(intentToStartEntryEditorActivity, NEW_ENTRY_REQUEST);
+        startActivityForResult(intentToStartEntryEditorActivity, ENTRY_CREATE_REQUEST);
     }
 
     private void toggleEmptyDiary()
@@ -140,13 +142,19 @@ public class BioDiaryMainActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        if (requestCode == NEW_ENTRY_REQUEST) {
-            if (resultCode == RESULT_OK) {
-                Diary.Entry newEntry = (Diary.Entry) data.getSerializableExtra(Intent.EXTRA_TEXT);
-                handleNewEntryCreated(newEntry);
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case ENTRY_CREATE_REQUEST:
+                    Diary.Entry newEntry
+                            = (Diary.Entry) data.getSerializableExtra(Intent.EXTRA_TEXT);
+                    handleNewEntryCreated(newEntry);
+                    break;
+                case ENTRY_DETAIL_REQUEST:
+                    Diary.Entry latestEntry
+                            = (Diary.Entry) data.getSerializableExtra(Intent.EXTRA_TEXT);
+                    handleEntryEdited(latestEntry);
             }
         }
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     private void handleNewEntryCreated(Diary.Entry entry)
@@ -160,5 +168,20 @@ public class BioDiaryMainActivity extends AppCompatActivity
 
             toggleEmptyDiary();
         }
+    }
+
+    private void handleEntryEdited(Diary.Entry entry)
+    {
+        mDatabaseHandler.updateEntry(entry);
+
+        // mDiary.getEntryList().add(0, );
+        for (Diary.Entry e : mDiary.getEntryList()) {
+            if (e.getId() == entry.getId()) {
+                e.setContent(entry.getContent());
+            }
+        }
+        mEntryListAdapter.notifyDataSetChanged();
+
+        toggleEmptyDiary();
     }
 }

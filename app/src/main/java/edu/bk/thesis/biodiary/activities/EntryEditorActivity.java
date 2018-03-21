@@ -38,25 +38,13 @@ public class EntryEditorActivity extends AppCompatActivity
                 if (isNewEntry) {
                     returnNewEntry();
                 }
+                else {
+                    returnEditedEntry();
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    private void returnNewEntry()
-    {
-        if (mEntryContent.getText().toString().trim().isEmpty()) {
-            setResult(Activity.RESULT_CANCELED);
-        }
-        else {
-            Intent result = new Intent();
-            result.putExtra(Intent.EXTRA_TEXT,
-                            new Diary.Entry(mEntryDate.getText().toString(),
-                                            mEntryContent.getText().toString()));
-            setResult(Activity.RESULT_OK, result);
-        }
-        finish();
     }
 
     @Override
@@ -76,7 +64,7 @@ public class EntryEditorActivity extends AppCompatActivity
             }
         });
         setSupportActionBar(mToolbar);
-        mToolbar.setTitle(null);
+        getSupportActionBar().setTitle("");
 
         mEntryDate = findViewById(R.id.et_entry_date);
         mEntryContent = findViewById(R.id.et_entry_content);
@@ -88,7 +76,7 @@ public class EntryEditorActivity extends AppCompatActivity
             if (intent.hasExtra(Intent.EXTRA_TEXT)) {
                 isNewEntry = false;
                 mEntry = (Diary.Entry) intent.getSerializableExtra(Intent.EXTRA_TEXT);
-                mEntryDate.setText(mEntry.getDateInString());
+                mEntryDate.setText(mEntry.getTimestampInString());
                 mEntryContent.setText(mEntry.getContent());
             }
         }
@@ -97,5 +85,37 @@ public class EntryEditorActivity extends AppCompatActivity
         // if (actionBar != null) {
         //     actionBar.setDisplayHomeAsUpEnabled(true);
         // }
+    }
+
+    private void returnNewEntry()
+    {
+        if (mEntryContent.getText().toString().trim().isEmpty()) {
+            setResult(Activity.RESULT_CANCELED);
+        }
+        else {
+            Intent result = new Intent();
+            result.putExtra(Intent.EXTRA_TEXT,
+                            new Diary.Entry(mEntryDate.getText().toString(),
+                                            mEntryContent.getText().toString()));
+            setResult(Activity.RESULT_OK, result);
+        }
+        finish();
+    }
+
+    private void returnEditedEntry()
+    {
+        if (mEntryContent.getText().toString().trim().isEmpty()) {
+            setResult(Activity.RESULT_CANCELED);
+        }
+        else {
+            Intent result = new Intent();
+            result.putExtra(Intent.EXTRA_TEXT,
+                            new Diary.Entry(
+                                    mEntry.getId(),
+                                    mEntry.getTimestamp(),
+                                    mEntryContent.getText().toString()));
+            setResult(Activity.RESULT_OK, result);
+        }
+        finish();
     }
 }

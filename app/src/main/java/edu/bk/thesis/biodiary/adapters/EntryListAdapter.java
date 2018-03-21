@@ -36,7 +36,7 @@ public class EntryListAdapter
     {
         Diary.Entry entry = mDiary.getEntryList().get(position);
 
-        holder.mTimestamp.setText(entry.getDateInString());
+        holder.mTimestamp.setText(entry.getTimestampInString());
 
         holder.mContent.setText(entry.getShortContent(200));
     }

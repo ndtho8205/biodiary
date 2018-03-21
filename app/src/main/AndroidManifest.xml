@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="edu.bk.thesis.biodiary">
 
     <application
@@ -19,17 +18,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity android:name=".activities.BioDiaryMainActivity" />
+
         <activity
             android:name=".activities.EntryDetailActivity"
-            android:parentActivityName=".activities.BioDiaryMainActivity"
-            tools:targetApi="jelly_bean" />
+            android:theme="@style/NoActionBar" />
         <activity
             android:name=".activities.EntryEditorActivity"
-            android:label=""
-            android:parentActivityName=".activities.BioDiaryMainActivity"
-            android:theme="@style/NoActionBar"
-            tools:targetApi="jelly_bean" />
+            android:theme="@style/NoActionBar" />
         <activity
             android:name=".activities.LoginActivity"
             android:theme="@style/NoActionBar" />

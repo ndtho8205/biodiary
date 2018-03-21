@@ -1,27 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="8dp"
     tools:context="edu.bk.thesis.biodiary.activities.EntryDetailActivity">
 
-    <TextView
-        android:id="@+id/tv_entry_detail_timestamp"
-        style="@style/EntryDateStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingTop="8dp">
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tv_entry_detail_content"
-            style="@style/EntryContentStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </ScrollView>
-</LinearLayout>
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/entry_detail_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:gravity="start"
+            app:contentInsetLeft="0dp"
+            app:contentInsetStart="0dp">
+
+            <android.support.v7.widget.ActionMenuView
+                android:id="@+id/entry_detail_toolbar_amv"
+                android:layout_width="wrap_content"
+                android:layout_height="?attr/actionBarSize" />
+        </android.support.v7.widget.Toolbar>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="24dp"
+            android:layout_marginStart="24dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_entry_detail_timestamp"
+                style="@style/EntryDateStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingTop="16dp">
+
+                <TextView
+                    android:id="@+id/tv_entry_detail_content"
+                    style="@style/EntryContentStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </ScrollView>
+        </LinearLayout>
+    </LinearLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_edit_entry"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="16dp"
+        android:focusable="true"
+        android:src="@drawable/ic_edit"
+        app:layout_behavior="edu.bk.thesis.biodiary.utils.FABScrollBehavior" />
+</android.support.design.widget.CoordinatorLayout>

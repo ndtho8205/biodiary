@@ -14,6 +14,7 @@ public class Diary implements Serializable
 
     public static final String COLUMN_ID        = "id";
     public static final String COLUMN_TIMESTAMP = "timestamp";
+    public static final String COLUMN_DATE      = "date";
     public static final String COLUMN_CONTENT   = "content";
     public static final String CREATE_TABLE     =
             "CREATE TABLE " + TABLE_NAME + "("
@@ -48,13 +49,13 @@ public class Diary implements Serializable
     {
         private long   mId;
         private long   mTimestamp;
-        private String mDate;
+        private long   mDate;
         private String mContent;
 
         public Entry(String date, String content)
         {
             mTimestamp = new Date().getTime();
-            mDate = date;
+            mDate = 0;
             mContent = content;
         }
 
@@ -80,6 +81,16 @@ public class Diary implements Serializable
             mTimestamp = timestamp;
         }
 
+        public long getDate()
+        {
+            return mDate;
+        }
+
+        public void setDate(long date)
+        {
+            mDate = date;
+        }
+
         public String getContent()
         {
             return mContent;
@@ -90,13 +101,13 @@ public class Diary implements Serializable
             mContent = content;
         }
 
-        public String getDateInString()
+        public String getTimestampInString()
         {
             SimpleDateFormat df = new SimpleDateFormat("dd/MM/YYYY HH:mm:ss", Locale.US);
-            return df.format(getDate());
+            return df.format(getTimestampInDate());
         }
 
-        public Date getDate()
+        public Date getTimestampInDate()
         {
             return new Date(mTimestamp);
         }
