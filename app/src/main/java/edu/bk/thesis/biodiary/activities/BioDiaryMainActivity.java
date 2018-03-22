@@ -142,6 +142,7 @@ public class BioDiaryMainActivity extends AppCompatActivity
         }
         else {
             mEmptyDiaryNotify.setVisibility(View.VISIBLE);
+            mNewEntryButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -182,7 +183,7 @@ public class BioDiaryMainActivity extends AppCompatActivity
 
     private void handleEntryDeleted(Diary.Entry entry)
     {
-        mDatabaseHandler.updateEntry(entry);
+        mDatabaseHandler.deleteEntry(entry);
 
         for (int i = 0; i < mDiary.getEntryList().size(); ++i) {
             if (mDiary.getEntryList().get(i).getId() == entry.getId()) {
@@ -196,7 +197,7 @@ public class BioDiaryMainActivity extends AppCompatActivity
 
     private void handleEntryEdited(Diary.Entry entry)
     {
-        mDatabaseHandler.deleteEntry(entry);
+        mDatabaseHandler.updateEntry(entry);
 
         for (Diary.Entry e : mDiary.getEntryList()) {
             if (e.getId() == entry.getId()) {
