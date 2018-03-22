@@ -4,11 +4,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 import edu.bk.thesis.biodiary.R;
 import edu.bk.thesis.biodiary.models.Diary;
@@ -16,17 +17,20 @@ import edu.bk.thesis.biodiary.models.Diary;
 
 public class EntryEditorActivity extends AppCompatActivity
 {
-    private Toolbar        mToolbar;
-    private ActionMenuView mMenuView;
-    private EditText       mEntryDate;
-    private EditText       mEntryContent;
-    private Diary.Entry    mEntry;
-    private boolean        isNewEntry;
+    private Toolbar   mToolbar;
+    private ImageView mCloseButton;
+
+    private EditText mEntryDate;
+    private EditText mEntryContent;
+
+    private Diary.Entry mEntry;
+
+    private boolean isNewEntry;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        getMenuInflater().inflate(R.menu.menu_entry_editor, mMenuView.getMenu());
+        getMenuInflater().inflate(R.menu.menu_entry_editor, menu);
         return true;
     }
 
@@ -34,14 +38,6 @@ public class EntryEditorActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item)
     {
         switch (item.getItemId()) {
-            case R.id.action_editor_close:
-                if (isNewEntry) {
-                    returnNewEntry();
-                }
-                else {
-                    returnEditedEntry();
-                }
-                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -54,17 +50,18 @@ public class EntryEditorActivity extends AppCompatActivity
         setContentView(R.layout.activity_entry_editor);
 
         mToolbar = findViewById(R.id.editor_toolbar);
-        mMenuView = findViewById(R.id.editor_toolbar_amv);
-        mMenuView.setOnMenuItemClickListener(new ActionMenuView.OnMenuItemClickListener()
-        {
-            @Override
-            public boolean onMenuItemClick(MenuItem item)
-            {
-                return onOptionsItemSelected(item);
-            }
-        });
         setSupportActionBar(mToolbar);
         getSupportActionBar().setTitle("");
+
+        mCloseButton = findViewById(R.id.action_editor_close);
+        mCloseButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                handleCloseButtonPressed();
+            }
+        });
 
         mEntryDate = findViewById(R.id.et_entry_date);
         mEntryContent = findViewById(R.id.et_entry_content);
@@ -80,14 +77,20 @@ public class EntryEditorActivity extends AppCompatActivity
                 mEntryContent.setText(mEntry.getContent());
             }
         }
-
-        // ActionBar actionBar = getSupportActionBar();
-        // if (actionBar != null) {
-        //     actionBar.setDisplayHomeAsUpEnabled(true);
-        // }
     }
 
-    private void returnNewEntry()
+    private void handleCloseButtonPressed()
+    {
+        if (isNewEntry) {
+            handleReturnNewEntry();
+        }
+        else {
+            handleReturnEditedEntry();
+        }
+        finish();
+    }
+
+    private void handleReturnNewEntry()
     {
         if (mEntryContent.getText().toString().trim().isEmpty()) {
             setResult(Activity.RESULT_CANCELED);
@@ -99,10 +102,9 @@ public class EntryEditorActivity extends AppCompatActivity
                                             mEntryContent.getText().toString()));
             setResult(Activity.RESULT_OK, result);
         }
-        finish();
     }
 
-    private void returnEditedEntry()
+    private void handleReturnEditedEntry()
     {
         if (mEntryContent.getText().toString().trim().isEmpty()) {
             setResult(Activity.RESULT_CANCELED);
@@ -116,6 +118,5 @@ public class EntryEditorActivity extends AppCompatActivity
                                     mEntryContent.getText().toString()));
             setResult(Activity.RESULT_OK, result);
         }
-        finish();
     }
 }

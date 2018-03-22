@@ -28,14 +28,16 @@ public class BioDiaryMainActivity extends AppCompatActivity
     static final int ENTRY_EDIT_REQUEST   = 3;
 
     private FloatingActionButton mNewEntryButton;
-    private RecyclerView         mEntryList;
-    private TextView             mEmptyDiaryNotify;
 
+    private TextView mEmptyDiaryNotify;
+
+    private RecyclerView     mEntryList;
     private EntryListAdapter mEntryListAdapter;
-    private Diary            mDiary;
 
     private DatabaseHandler    mDatabaseHandler;
     private PreferencesHandler mPreferencesHandler;
+
+    private Diary mDiary;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
@@ -72,10 +74,10 @@ public class BioDiaryMainActivity extends AppCompatActivity
     @Override
     public void onClick(Diary.Entry entry)
     {
-        startActivityForEntryDetail(entry);
+        handleEntryPressed(entry);
     }
 
-    private void startActivityForEntryDetail(Diary.Entry entry)
+    private void handleEntryPressed(Diary.Entry entry)
     {
         Intent intentToStartEntryDetailActivity = new Intent(this, EntryDetailActivity.class);
         intentToStartEntryDetailActivity.putExtra(Intent.EXTRA_TEXT, entry);
@@ -98,7 +100,7 @@ public class BioDiaryMainActivity extends AppCompatActivity
             @Override
             public void onClick(View view)
             {
-                startActivityForNewEntry();
+                handleNewEntryButtonPressed();
             }
         });
 
@@ -109,20 +111,22 @@ public class BioDiaryMainActivity extends AppCompatActivity
                                                                     false);
         mEntryList.setLayoutManager(layoutManager);
         mEntryList.setItemAnimator(new DefaultItemAnimator());
-        // mEntryList.addItemDecoration(new DividerItemDecoration(this, 16));
         mEntryList.setHasFixedSize(true);
         mEntryListAdapter = new EntryListAdapter(this);
         mEntryList.setAdapter(mEntryListAdapter);
 
-        // init
+        // handles
         mPreferencesHandler = new PreferencesHandler(getApplicationContext());
         mDatabaseHandler = new DatabaseHandler(this);
+
+        // diary
         mDiary = new Diary(mDatabaseHandler.getAllEntries());
         mEntryListAdapter.setDiary(mDiary);
+
         toggleEmptyDiary();
     }
 
-    private void startActivityForNewEntry()
+    private void handleNewEntryButtonPressed()
     {
         Intent intentToStartEntryEditorActivity = new Intent(BioDiaryMainActivity.this,
                                                              EntryEditorActivity.class);
@@ -147,7 +151,7 @@ public class BioDiaryMainActivity extends AppCompatActivity
                 case ENTRY_CREATE_REQUEST:
                     Diary.Entry newEntry
                             = (Diary.Entry) data.getSerializableExtra(Intent.EXTRA_TEXT);
-                    handleNewEntryCreated(newEntry);
+                    handleEntryCreated(newEntry);
                     break;
                 case ENTRY_DETAIL_REQUEST:
                     Diary.Entry latestEntry
@@ -157,7 +161,7 @@ public class BioDiaryMainActivity extends AppCompatActivity
         }
     }
 
-    private void handleNewEntryCreated(Diary.Entry entry)
+    private void handleEntryCreated(Diary.Entry entry)
     {
         long        id                = mDatabaseHandler.insertEntry(entry);
         Diary.Entry entryFromDatabase = mDatabaseHandler.getEntry(id);
