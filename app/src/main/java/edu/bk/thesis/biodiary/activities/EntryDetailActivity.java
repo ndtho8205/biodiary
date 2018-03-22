@@ -1,6 +1,9 @@
 package edu.bk.thesis.biodiary.activities;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -41,10 +44,33 @@ public class EntryDetailActivity extends AppCompatActivity
     {
         switch (item.getItemId()) {
             case R.id.action_entry_detail_trash:
-                System.out.println("trash");
+                handleDeleteEntryButtonPressed();
+                return true;
+            case R.id.action_entry_detail_copy:
+                handleCopyEntryButtonPressed();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void handleDeleteEntryButtonPressed()
+    {
+        Intent result = new Intent();
+        result.putExtra(BioDiaryMainActivity.EXTRA_DELETE_ENTRY, true);
+        result.putExtra(Intent.EXTRA_TEXT, mEntry);
+        setResult(Activity.RESULT_OK, result);
+
+        finish();
+    }
+
+    private void handleCopyEntryButtonPressed()
+    {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("Copied entry's content.",
+                                              mEntry.getContent());
+        if (clipboard != null) {
+            clipboard.setPrimaryClip(clip);
         }
     }
 
@@ -98,8 +124,7 @@ public class EntryDetailActivity extends AppCompatActivity
         }
         else {
             Intent result = new Intent();
-            result.putExtra(Intent.EXTRA_TEXT,
-                            mEntry);
+            result.putExtra(Intent.EXTRA_TEXT, mEntry);
             setResult(Activity.RESULT_OK, result);
         }
         finish();

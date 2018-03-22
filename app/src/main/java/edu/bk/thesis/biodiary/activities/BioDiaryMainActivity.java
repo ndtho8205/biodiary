@@ -27,6 +27,8 @@ public class BioDiaryMainActivity extends AppCompatActivity
     static final int ENTRY_DETAIL_REQUEST = 2;
     static final int ENTRY_EDIT_REQUEST   = 3;
 
+    static final String EXTRA_DELETE_ENTRY = "DELETE_ENTRY";
+
     private FloatingActionButton mNewEntryButton;
 
     private TextView mEmptyDiaryNotify;
@@ -147,16 +149,20 @@ public class BioDiaryMainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         if (resultCode == RESULT_OK) {
+            Diary.Entry entry
+                    = (Diary.Entry) data.getSerializableExtra(Intent.EXTRA_TEXT);
+
             switch (requestCode) {
                 case ENTRY_CREATE_REQUEST:
-                    Diary.Entry newEntry
-                            = (Diary.Entry) data.getSerializableExtra(Intent.EXTRA_TEXT);
-                    handleEntryCreated(newEntry);
+                    handleEntryCreated(entry);
                     break;
                 case ENTRY_DETAIL_REQUEST:
-                    Diary.Entry latestEntry
-                            = (Diary.Entry) data.getSerializableExtra(Intent.EXTRA_TEXT);
-                    handleEntryEdited(latestEntry);
+                    if (data.hasExtra(EXTRA_DELETE_ENTRY)) {
+                        handleEntryDeleted(entry);
+                    }
+                    else {
+                        handleEntryEdited(entry);
+                    }
             }
         }
     }
@@ -174,11 +180,24 @@ public class BioDiaryMainActivity extends AppCompatActivity
         }
     }
 
-    private void handleEntryEdited(Diary.Entry entry)
+    private void handleEntryDeleted(Diary.Entry entry)
     {
         mDatabaseHandler.updateEntry(entry);
 
-        // mDiary.getEntryList().add(0, );
+        for (int i = 0; i < mDiary.getEntryList().size(); ++i) {
+            if (mDiary.getEntryList().get(i).getId() == entry.getId()) {
+                mDiary.getEntryList().remove(i);
+            }
+        }
+        mEntryListAdapter.notifyDataSetChanged();
+
+        toggleEmptyDiary();
+    }
+
+    private void handleEntryEdited(Diary.Entry entry)
+    {
+        mDatabaseHandler.deleteEntry(entry);
+
         for (Diary.Entry e : mDiary.getEntryList()) {
             if (e.getId() == entry.getId()) {
                 e.setContent(entry.getContent());
