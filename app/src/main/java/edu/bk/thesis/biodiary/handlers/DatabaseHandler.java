@@ -14,7 +14,7 @@ import edu.bk.thesis.biodiary.models.Diary;
 
 public class DatabaseHandler extends SQLiteOpenHelper
 {
-    private static final int    DATABASE_VERSION = 1;
+    private static final int    DATABASE_VERSION = 2;
     private static final String DATABASE_NAME    = "biodiaryDB.db";
 
     public DatabaseHandler(Context context)
@@ -28,6 +28,7 @@ public class DatabaseHandler extends SQLiteOpenHelper
 
         ContentValues values = new ContentValues();
         values.put(Diary.COLUMN_TIMESTAMP, entry.getTimestamp());
+        values.put(Diary.COLUMN_DATE, entry.getDateInMilisecond());
         values.put(Diary.COLUMN_CONTENT, entry.getContent());
 
         long id = db.insert(Diary.TABLE_NAME, null, values);
@@ -43,6 +44,7 @@ public class DatabaseHandler extends SQLiteOpenHelper
 
         Cursor cursor = db.query(Diary.TABLE_NAME,
                                  new String[]{ Diary.COLUMN_ID, Diary.COLUMN_TIMESTAMP,
+                                               Diary.COLUMN_DATE,
                                                Diary.COLUMN_CONTENT },
                                  Diary.COLUMN_ID + "=?",
                                  new String[]{ String.valueOf(id) },
@@ -55,7 +57,8 @@ public class DatabaseHandler extends SQLiteOpenHelper
         if (cursor != null && cursor.moveToFirst()) {
             entry = new Diary.Entry(cursor.getLong(cursor.getColumnIndex(Diary.COLUMN_ID)),
                                     cursor.getLong(cursor.getColumnIndex(Diary.COLUMN_TIMESTAMP)),
-                                    cursor.getString(cursor.getColumnIndex(Diary.COLUMN_CONTENT)));
+                                    cursor.getString(cursor.getColumnIndex(Diary.COLUMN_CONTENT)),
+                                    cursor.getLong(cursor.getColumnIndex(Diary.COLUMN_DATE)));
             cursor.close();
         }
 
@@ -71,7 +74,7 @@ public class DatabaseHandler extends SQLiteOpenHelper
 
         String selectQuery =
                 "SELECT * FROM " + Diary.TABLE_NAME
-                + " ORDER BY " + Diary.COLUMN_TIMESTAMP + " DESC";
+                + " ORDER BY " + Diary.COLUMN_DATE + " DESC";
 
         SQLiteDatabase db     = getReadableDatabase();
         Cursor         cursor = db.rawQuery(selectQuery, null);
@@ -81,7 +84,8 @@ public class DatabaseHandler extends SQLiteOpenHelper
                 Diary.Entry entry
                         = new Diary.Entry(cursor.getLong(cursor.getColumnIndex(Diary.COLUMN_ID)),
                                           cursor.getLong(cursor.getColumnIndex(Diary.COLUMN_TIMESTAMP)),
-                                          cursor.getString(cursor.getColumnIndex(Diary.COLUMN_CONTENT)));
+                                          cursor.getString(cursor.getColumnIndex(Diary.COLUMN_CONTENT)),
+                                          cursor.getLong(cursor.getColumnIndex(Diary.COLUMN_DATE)));
                 entries.add(entry);
             } while (cursor.moveToNext());
         }
@@ -113,6 +117,7 @@ public class DatabaseHandler extends SQLiteOpenHelper
 
         ContentValues values = new ContentValues();
         values.put(Diary.COLUMN_CONTENT, entry.getContent());
+        values.put(Diary.COLUMN_DATE, entry.getDateInMilisecond());
 
         return db.update(Diary.TABLE_NAME, values, Diary.COLUMN_ID + " = ?",
                          new String[]{ String.valueOf(entry.getId()) });

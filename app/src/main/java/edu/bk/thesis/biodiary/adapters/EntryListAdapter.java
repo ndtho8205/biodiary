@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import edu.bk.thesis.biodiary.R;
 import edu.bk.thesis.biodiary.models.Diary;
+import edu.bk.thesis.biodiary.utils.DateConverter;
 
 
 public class EntryListAdapter
@@ -36,7 +37,7 @@ public class EntryListAdapter
     {
         Diary.Entry entry = mDiary.getEntryList().get(position);
 
-        holder.mTimestamp.setText(entry.getTimestampInString());
+        holder.mDate.setText(entry.getDateInString(DateConverter.PATTERN_SHORT_DATE));
 
         holder.mContent.setText(entry.getShortContent(200));
     }
@@ -63,14 +64,14 @@ public class EntryListAdapter
 
     class EntryListAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {
-        final TextView mTimestamp;
+        final TextView mDate;
         final TextView mContent;
 
         EntryListAdapterViewHolder(View view)
         {
             super(view);
 
-            mTimestamp = view.findViewById(R.id.tv_entry_timestamp);
+            mDate = view.findViewById(R.id.tv_entry_date);
             mContent = view.findViewById(R.id.tv_entry_content);
 
             view.setOnClickListener(this);

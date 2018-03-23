@@ -79,13 +79,6 @@ public class BioDiaryMainActivity extends AppCompatActivity
         handleEntryPressed(entry);
     }
 
-    private void handleEntryPressed(Diary.Entry entry)
-    {
-        Intent intentToStartEntryDetailActivity = new Intent(this, EntryDetailActivity.class);
-        intentToStartEntryDetailActivity.putExtra(Intent.EXTRA_TEXT, entry);
-        startActivityForResult(intentToStartEntryDetailActivity, ENTRY_DETAIL_REQUEST);
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -128,24 +121,6 @@ public class BioDiaryMainActivity extends AppCompatActivity
         toggleEmptyDiary();
     }
 
-    private void handleNewEntryButtonPressed()
-    {
-        Intent intentToStartEntryEditorActivity = new Intent(BioDiaryMainActivity.this,
-                                                             EntryEditorActivity.class);
-        startActivityForResult(intentToStartEntryEditorActivity, ENTRY_CREATE_REQUEST);
-    }
-
-    private void toggleEmptyDiary()
-    {
-        if (mDiary.getEntryList().size() > 0) {
-            mEmptyDiaryNotify.setVisibility(View.GONE);
-        }
-        else {
-            mEmptyDiaryNotify.setVisibility(View.VISIBLE);
-            mNewEntryButton.setVisibility(View.VISIBLE);
-        }
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
@@ -165,6 +140,31 @@ public class BioDiaryMainActivity extends AppCompatActivity
                         handleEntryEdited(entry);
                     }
             }
+        }
+    }
+
+    private void handleEntryPressed(Diary.Entry entry)
+    {
+        Intent intentToStartEntryDetailActivity = new Intent(this, EntryDetailActivity.class);
+        intentToStartEntryDetailActivity.putExtra(Intent.EXTRA_TEXT, entry);
+        startActivityForResult(intentToStartEntryDetailActivity, ENTRY_DETAIL_REQUEST);
+    }
+
+    private void handleNewEntryButtonPressed()
+    {
+        Intent intentToStartEntryEditorActivity = new Intent(BioDiaryMainActivity.this,
+                                                             EntryEditorActivity.class);
+        startActivityForResult(intentToStartEntryEditorActivity, ENTRY_CREATE_REQUEST);
+    }
+
+    private void toggleEmptyDiary()
+    {
+        if (mDiary.getEntryList().size() > 0) {
+            mEmptyDiaryNotify.setVisibility(View.GONE);
+        }
+        else {
+            mEmptyDiaryNotify.setVisibility(View.VISIBLE);
+            mNewEntryButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -202,6 +202,7 @@ public class BioDiaryMainActivity extends AppCompatActivity
         for (Diary.Entry e : mDiary.getEntryList()) {
             if (e.getId() == entry.getId()) {
                 e.setContent(entry.getContent());
+                e.setDate(entry.getDateInMilisecond());
             }
         }
         mEntryListAdapter.notifyDataSetChanged();

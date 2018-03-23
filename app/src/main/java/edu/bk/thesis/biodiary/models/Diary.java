@@ -1,11 +1,12 @@
 package edu.bk.thesis.biodiary.models;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
+
+import edu.bk.thesis.biodiary.utils.DateConverter;
 
 
 public class Diary implements Serializable
@@ -20,7 +21,8 @@ public class Diary implements Serializable
             "CREATE TABLE " + TABLE_NAME + "("
             + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
             + COLUMN_TIMESTAMP + " INTEGER,"
-            + COLUMN_CONTENT + " TEXT"
+            + COLUMN_CONTENT + " TEXT,"
+            + COLUMN_DATE + " INTEGER"
             + ")";
 
     private List<Entry> mEntryList;
@@ -49,21 +51,31 @@ public class Diary implements Serializable
     {
         private long   mId;
         private long   mTimestamp;
-        private long   mDate;
         private String mContent;
+        private long   mDate;
 
-        public Entry(String date, String content)
+        public Entry(String content, String date, String pattern) throws ParseException
         {
             mTimestamp = new Date().getTime();
-            mDate = 0;
             mContent = content;
+            setDate(date, pattern);
         }
 
-        public Entry(long id, long timestamp, String content)
+        public Entry(long id, long timestamp, String content, long date)
         {
             mId = id;
             mTimestamp = timestamp;
             mContent = content;
+            setDate(date);
+        }
+
+        public Entry(long id, long timestamp, String content, String date, String pattern)
+                throws ParseException
+        {
+            mId = id;
+            mTimestamp = timestamp;
+            mContent = content;
+            setDate(date, pattern);
         }
 
         public long getId()
@@ -81,16 +93,6 @@ public class Diary implements Serializable
             mTimestamp = timestamp;
         }
 
-        public long getDate()
-        {
-            return mDate;
-        }
-
-        public void setDate(long date)
-        {
-            mDate = date;
-        }
-
         public String getContent()
         {
             return mContent;
@@ -101,23 +103,43 @@ public class Diary implements Serializable
             mContent = content;
         }
 
-        public String getTimestampInString()
-        {
-            SimpleDateFormat df = new SimpleDateFormat("dd/MM/YYYY HH:mm:ss", Locale.US);
-            return df.format(getTimestampInDate());
-        }
-
-        public Date getTimestampInDate()
-        {
-            return new Date(mTimestamp);
-        }
-
         public String getShortContent(int wordLength)
         {
             //TODO: implement get substring by word, instead of characters.
             return wordLength > mContent.length()
                    ? mContent
                    : mContent.substring(0, wordLength) + "...";
+        }
+
+        public Date getDate()
+        {
+
+            return DateConverter.millisecond2Date(mDate);
+        }
+
+        public void setDate(Date date)
+        {
+            mDate = DateConverter.date2Millisecond(date);
+        }
+
+        public void setDate(long date)
+        {
+            mDate = date;
+        }
+
+        public long getDateInMilisecond()
+        {
+            return mDate;
+        }
+
+        public String getDateInString(String pattern)
+        {
+            return DateConverter.date2String(DateConverter.millisecond2Date(mDate), pattern);
+        }
+
+        public void setDate(String string, String pattern) throws ParseException
+        {
+            mDate = DateConverter.date2Millisecond(DateConverter.string2Date(string, pattern));
         }
     }
 }

@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import edu.bk.thesis.biodiary.R;
 import edu.bk.thesis.biodiary.models.Diary;
+import edu.bk.thesis.biodiary.utils.DateConverter;
 
 
 public class EntryDetailActivity extends AppCompatActivity
@@ -25,7 +26,7 @@ public class EntryDetailActivity extends AppCompatActivity
     private ImageView            mCloseButton;
     private FloatingActionButton mEditEntryButton;
 
-    private TextView mDetailTimestamp;
+    private TextView mDetailDate;
     private TextView mDetailContent;
 
     private Diary.Entry mEntry;
@@ -51,26 +52,6 @@ public class EntryDetailActivity extends AppCompatActivity
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
-        }
-    }
-
-    private void handleDeleteEntryButtonPressed()
-    {
-        Intent result = new Intent();
-        result.putExtra(BioDiaryMainActivity.EXTRA_DELETE_ENTRY, true);
-        result.putExtra(Intent.EXTRA_TEXT, mEntry);
-        setResult(Activity.RESULT_OK, result);
-
-        finish();
-    }
-
-    private void handleCopyEntryButtonPressed()
-    {
-        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText("Copied entry's content.",
-                                              mEntry.getContent());
-        if (clipboard != null) {
-            clipboard.setPrimaryClip(clip);
         }
     }
 
@@ -104,16 +85,53 @@ public class EntryDetailActivity extends AppCompatActivity
             }
         });
 
-        mDetailTimestamp = findViewById(R.id.tv_entry_detail_timestamp);
+        mDetailDate = findViewById(R.id.tv_entry_detail_date);
         mDetailContent = findViewById(R.id.tv_entry_detail_content);
 
         Intent intent = getIntent();
         if (intent != null) {
             if (intent.hasExtra(Intent.EXTRA_TEXT)) {
                 mEntry = (Diary.Entry) intent.getSerializableExtra(Intent.EXTRA_TEXT);
-                mDetailTimestamp.setText(mEntry.getTimestampInString());
-                mDetailContent.setText(mEntry.getContent());
+                updateEntryDetail(mEntry);
             }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (resultCode == RESULT_OK) {
+            if (requestCode == BioDiaryMainActivity.ENTRY_EDIT_REQUEST) {
+                mEntry = (Diary.Entry) data.getSerializableExtra(Intent.EXTRA_TEXT);
+                updateEntryDetail(mEntry);
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void updateEntryDetail(Diary.Entry entry)
+    {
+        mDetailDate.setText(mEntry.getDateInString(DateConverter.PATTERN_SHORT_DATE));
+        mDetailContent.setText(mEntry.getContent());
+    }
+
+    private void handleDeleteEntryButtonPressed()
+    {
+        Intent result = new Intent();
+        result.putExtra(BioDiaryMainActivity.EXTRA_DELETE_ENTRY, true);
+        result.putExtra(Intent.EXTRA_TEXT, mEntry);
+        setResult(Activity.RESULT_OK, result);
+
+        finish();
+    }
+
+    private void handleCopyEntryButtonPressed()
+    {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("Copied entry's content.",
+                                              mEntry.getContent());
+        if (clipboard != null) {
+            clipboard.setPrimaryClip(clip);
         }
     }
 
@@ -137,17 +155,5 @@ public class EntryDetailActivity extends AppCompatActivity
         intentToStartEntryEditorActivity.putExtra(Intent.EXTRA_TEXT, mEntry);
         startActivityForResult(intentToStartEntryEditorActivity,
                                BioDiaryMainActivity.ENTRY_EDIT_REQUEST);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        if (resultCode == RESULT_OK) {
-            if (requestCode == BioDiaryMainActivity.ENTRY_EDIT_REQUEST) {
-                mEntry = (Diary.Entry) data.getSerializableExtra(Intent.EXTRA_TEXT);
-                mDetailContent.setText(mEntry.getContent());
-            }
-        }
-        super.onActivityResult(requestCode, resultCode, data);
     }
 }
