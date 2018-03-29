@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 
 import java.util.Date;
 
@@ -90,7 +91,9 @@ public class BioDiaryMainActivity extends AppCompatActivity
                           "Nullam eget luctus erat, id elementum urna. Praesent tristique feugiat nibh eget molestie. Suspendisse potenti. Duis tincidunt id tortor quis hendrerit. Nullam molestie et velit a pellentesque. In hac habitasse platea dictumst. Praesent in mauris quis massa fringilla suscipit. Nunc a dignissim nunc. Duis eleifend ipsum quam, ac interdum sapien consequat sed. Praesent cursus consectetur risus ac blandit. Morbi vestibulum dapibus dui, nec dignissim orci dignissim eget. Suspendisse potenti.")
 
         };
+
         mDiaryAdapter.setDiaryData(diaryData);
+
     }
 
 
@@ -108,6 +111,7 @@ public class BioDiaryMainActivity extends AppCompatActivity
         switch (item.getItemId()) {
             case R.id.action_settings:
                 System.out.println("Action: Settings");
+                launchActivity();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -120,5 +124,10 @@ public class BioDiaryMainActivity extends AppCompatActivity
         Intent intentToStartDiaryDetailActivity = new Intent(this, DiaryDetailActivity.class);
         intentToStartDiaryDetailActivity.putExtra(Intent.EXTRA_TEXT, diary);
         startActivity(intentToStartDiaryDetailActivity);
+    }
+
+    private void launchActivity() {
+        Intent intent = new Intent(this, SettingActivity.class);
+        startActivity(intent);
     }
 }
