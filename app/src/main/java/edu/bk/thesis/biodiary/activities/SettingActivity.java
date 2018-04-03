@@ -1,5 +1,6 @@
 package edu.bk.thesis.biodiary.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -28,6 +29,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.SeekBar.*;
 
+import edu.bk.thesis.biodiary.lib.*;
+
 
 
 public class SettingActivity extends AppCompatActivity
@@ -36,6 +39,7 @@ public class SettingActivity extends AppCompatActivity
     private static final String AUDIO_RECORDER_FOLDER = "AudioRecorder";
     private static final String AUDIO_RECORDER_TEMP_FILE = "record_temp.raw";
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,6 +47,22 @@ public class SettingActivity extends AppCompatActivity
         SeekBar sb = (SeekBar) findViewById(R.id.seekBar);
         final TextView faceValue = (TextView) findViewById(R.id.fc);
         final TextView voiceValue = (TextView) findViewById(R.id.sc);
+
+        CoefficientManager manager = new CoefficientManager();
+        try {
+            double faceCo =manager.loadFace(getApplicationContext());
+            sb.setProgress((int) (faceCo*100));
+            faceValue.setText("Face Coefficient:"+(Double.toString(faceCo)));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            double voiceCo =manager.loadVoice(getApplicationContext());
+            voiceValue.setText("Voice Coefficient:"+(Double.toString(voiceCo)));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
         sb.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
             int value=0;
@@ -60,8 +80,8 @@ public class SettingActivity extends AppCompatActivity
             @Override
             public void onStopTrackingTouch(SeekBar sb) {
                 // TODO Auto-generated method stub
-                faceValue.setText("Face Coefficient:"+String.valueOf((double)value/sb.getMax()));
-                voiceValue.setText("Face Coefficient:"+String.valueOf(1-(double)value/sb.getMax()));
+                faceValue.setText("Face Coefficient:"+(String.valueOf((double)value/sb.getMax())));
+                voiceValue.setText("Voice Coefficient:"+(String.valueOf(1-(double)value/sb.getMax())));
             }
         });
     }
@@ -77,13 +97,13 @@ public class SettingActivity extends AppCompatActivity
         return (file.getAbsolutePath() + "/" + "owner" + AUDIO_RECORDER_FILE_EXT_WAV);
     }
 
-    public void saveCoefficent(View arg0){
+    public void saveCoefficent(View arg0) throws Exception {
         SeekBar sb = (SeekBar) findViewById(R.id.seekBar);
         double faceCo= (double)sb.getProgress()/sb.getMax();
         double voiceCo= 1-faceCo;
-        //TO-DO
-        //SAVE NHOE THO
-        //SAVE 2 CAI faceCo va voiceCo
+
+        CoefficientManager manager = new CoefficientManager();
+        manager.save(getApplicationContext(),faceCo,voiceCo);
         finish();
 
     }
