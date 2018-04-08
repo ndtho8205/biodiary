@@ -23,7 +23,7 @@ public class SplashScreenActivity extends AppCompatActivity
 
         if (!mPreferencesHandler.isSetUp()) {
             Intent intentToStartWelcomeActivity = new Intent(getApplicationContext(),
-                                                             WelcomeActivity.class);
+                                                             SetupActivity.class);
             startActivity(intentToStartWelcomeActivity);
             finish();
             return;
