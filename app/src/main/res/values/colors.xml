@@ -9,12 +9,12 @@
     <color name="colorSecondaryText">#757575</color>
     <color name="colorPrimaryText">#212121</color>
 
-    <color name="colorSplashScreenBackground">#ce93d8</color>
-    <color name="colorEntryDate">#009688</color>
+    <color name="colorSplashScreenBackground">@color/colorPrimary</color>
+    <color name="colorSetupScreenBackground">@color/colorPrimary</color>
 
+    <color name="colorEntryDate">#009688</color>
     <color name="colorCardBackground">#aa00ff</color>
 
-    <color name="colorSetupScreenBackground">#673AB7</color>
 
     <color name="gray_50">#FAFAFA</color>
     <color name="gray_100">#F5F5F5</color>
