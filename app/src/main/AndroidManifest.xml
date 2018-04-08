@@ -3,10 +3,10 @@
     package="edu.bk.thesis.biodiary">
 
     <uses-permission android:name="android.permission.CAMERA" />
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
-
 
     <application
         android:allowBackup="true"
@@ -37,6 +37,7 @@
         <activity
             android:name=".activities.WelcomeActivity"
             android:theme="@style/NoActionBar" />
+        <activity android:name=".activities.SettingsActivity"></activity>
     </application>
 
 </manifest>

@@ -6,11 +6,13 @@ import android.content.SharedPreferences;
 
 public class PreferencesHandler
 {
-    public static final  String KEY_NAME     = "name";
-    private static final String PREF_NAME    = "BioDiary";
-    private static final String IS_SETUP     = "isSetUp";
-    private static final String IS_LOGIN     = "isLoggedIn";
-    private static final int    PRIVATE_MODE = Context.MODE_PRIVATE;
+    public static final  String KEY_NAME              = "name";
+    private static final String PREF_NAME             = "BioDiary";
+    private static final String KEY_IS_SETUP          = "isSetUp";
+    private static final String KEY_IS_LOGIN          = "isLoggedIn";
+    private static final String KEY_FACE_COEFFICIENT  = "faceCoefficient";
+    private static final String KEY_VOICE_COEFFICIENT = "voiceCoefficient";
+    private static final int    PRIVATE_MODE          = Context.MODE_PRIVATE;
 
     private SharedPreferences        mPref;
     private SharedPreferences.Editor mEditor;
@@ -25,36 +27,51 @@ public class PreferencesHandler
 
     public void createLoginSession()
     {
-        mEditor.putBoolean(IS_LOGIN, true);
+        mEditor.putBoolean(KEY_IS_LOGIN, true);
         mEditor.commit();
     }
 
     public void setUp()
     {
-        mEditor.putBoolean(IS_SETUP, true);
+        mEditor.putBoolean(KEY_IS_SETUP, true);
         mEditor.commit();
     }
 
     public void logoutUser()
     {
-        mEditor.putBoolean(IS_LOGIN, false);
+        mEditor.putBoolean(KEY_IS_LOGIN, false);
         mEditor.commit();
     }
 
     public void reset()
     {
-        mEditor.putBoolean(IS_SETUP, false);
-        mEditor.putBoolean(IS_LOGIN, false);
-        mEditor.commit();
+        mEditor.clear().commit();
     }
 
     public boolean isSetUp()
     {
-        return mPref.getBoolean(IS_SETUP, false);
+        return mPref.getBoolean(KEY_IS_SETUP, false);
     }
 
     public boolean isLoggedIn()
     {
-        return mPref.getBoolean(IS_LOGIN, false);
+        return mPref.getBoolean(KEY_IS_LOGIN, false);
+    }
+
+    public void updateCoefficients(float faceCoefficient, float voiceCoefficient)
+    {
+        mEditor.putFloat(KEY_FACE_COEFFICIENT, faceCoefficient);
+        mEditor.putFloat(KEY_VOICE_COEFFICIENT, voiceCoefficient);
+        mEditor.commit();
+    }
+
+    public float getFaceCoefficient()
+    {
+        return mPref.getFloat(KEY_FACE_COEFFICIENT, 0.5f);
+    }
+
+    public float getVoiceCoefficient()
+    {
+        return mPref.getFloat(KEY_VOICE_COEFFICIENT, 0.5f);
     }
 }
