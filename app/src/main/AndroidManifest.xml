@@ -37,7 +37,14 @@
         <activity
             android:name=".activities.WelcomeActivity"
             android:theme="@style/NoActionBar" />
-        <activity android:name=".activities.SettingsActivity"></activity>
+        <activity
+            android:name=".activities.SettingsActivity"
+            android:label="Settings"
+            android:parentActivityName=".activities.BioDiaryMainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.BioDiaryMainActivity" />
+        </activity>
     </application>
 
 </manifest>

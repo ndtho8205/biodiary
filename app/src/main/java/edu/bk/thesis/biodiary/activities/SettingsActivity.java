@@ -8,6 +8,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import java.io.File;
+import java.text.DecimalFormat;
 
 import edu.bk.thesis.biodiary.R;
 import edu.bk.thesis.biodiary.handlers.PreferencesHandler;
@@ -20,32 +21,14 @@ public class SettingsActivity extends AppCompatActivity
     private static final String AUDIO_RECORDER_FOLDER       = "AudioRecorder";
     private static final String AUDIO_RECORDER_TEMP_FILE    = "record_temp.raw";
 
+    private SeekBar  mCoefficientSeekbar;
+    private TextView mFaceCoefficientTextView;
+    private TextView mVoiceCoefficientTextView;
+
+    private float mFaceCoefficient;
+    private float mVoiceCoefficient;
+
     private PreferencesHandler mPreferencesHandler;
-
-    public void saveCoefficent(View arg0) throws Exception
-    {
-        SeekBar sb      = (SeekBar) findViewById(R.id.seekBar);
-        float   faceCo  = (float) sb.getProgress() / sb.getMax();
-        float   voiceCo = 1 - faceCo;
-
-        mPreferencesHandler.updateCoefficients(faceCo, voiceCo);
-        finish();
-    }
-
-    public void cancel(View arg0)
-    {
-        finish();
-    }
-
-    public void deleteData(View v)
-    {
-        //Delete voice data
-        File file = new File(getOwnerFilename());
-        file.delete();
-
-        //Delete face data
-        //Hung gank tem
-    }
 
     private static String getOwnerFilename()
     {
@@ -59,41 +42,40 @@ public class SettingsActivity extends AppCompatActivity
         return (file.getAbsolutePath() + "/" + "owner" + AUDIO_RECORDER_FILE_EXT_WAV);
     }
 
+    public void deleteData(View v)
+    {
+        //Delete voice data
+        File file = new File(getOwnerFilename());
+        file.delete();
+
+        //Delete face data
+        //Hung gank tem
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        SeekBar        sb         = (SeekBar) findViewById(R.id.seekBar);
-        final TextView faceValue  = (TextView) findViewById(R.id.fc);
-        final TextView voiceValue = (TextView) findViewById(R.id.sc);
 
-        try {
-            double faceCo = mPreferencesHandler.getFaceCoefficient();
-            sb.setProgress((int) (faceCo * 100));
-            faceValue.setText("Face Coefficient:" + (Double.toString(faceCo)));
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
-            double voiceCo = mPreferencesHandler.getVoiceCoefficient();
-            voiceValue.setText("Voice Coefficient:" + (Double.toString(voiceCo)));
-        }
-        catch (Exception e) {
-            e.printStackTrace();
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
+        mCoefficientSeekbar = findViewById(R.id.seekbar_coefficient);
+        mFaceCoefficientTextView = findViewById(R.id.face_coefficient_value);
+        mVoiceCoefficientTextView = findViewById(R.id.voice_coefficient_value);
 
-        sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+        mPreferencesHandler = new PreferencesHandler(getApplicationContext());
+        mFaceCoefficient = mPreferencesHandler.getFaceCoefficient();
+        mVoiceCoefficient = mPreferencesHandler.getVoiceCoefficient();
+
+        mCoefficientSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
         {
-            int value = 0;
-
             @Override
             public void onProgressChanged(SeekBar sb, int progress, boolean fromUser)
             {
-                // TODO Auto-generated method stub
-                value = progress;
+                handleSeekbarChange(progress);
             }
 
             @Override
@@ -106,12 +88,26 @@ public class SettingsActivity extends AppCompatActivity
             public void onStopTrackingTouch(SeekBar sb)
             {
                 // TODO Auto-generated method stub
-                faceValue.setText(
-                        "Face Coefficient:" + (String.valueOf((double) value / sb.getMax())));
-                voiceValue.setText("Voice Coefficient:" +
-                                   (String.valueOf(1 - (double) value / sb.getMax())));
             }
         });
+
+        mCoefficientSeekbar.setProgress((int) (mFaceCoefficient * 100));
+    }
+
+    private void handleSeekbarChange(int value)
+    {
+        mFaceCoefficient = value / (float) mCoefficientSeekbar.getMax();
+        mVoiceCoefficient = 1.0f - mFaceCoefficient;
+
+        mFaceCoefficientTextView.setText(float2String(mFaceCoefficient));
+        mVoiceCoefficientTextView.setText(float2String(mVoiceCoefficient));
+
+        mPreferencesHandler.updateCoefficients(mFaceCoefficient, mVoiceCoefficient);
+    }
+
+    private String float2String(float value)
+    {
+        return new DecimalFormat("#.##").format(value);
     }
 }
 
