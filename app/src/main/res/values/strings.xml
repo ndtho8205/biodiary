@@ -13,4 +13,11 @@
     <string name="logout">Logout</string>
     <string name="reset">Reset</string>
     <string name="action_close">action_close</string>
+
+    <string name="eigenfaces">Eigenfaces</string>
+    <string name="fisherfaces">Fisherfaces</string>
+    <string name="threshold_face">Face threshold:</string>
+    <string name="threshold_distance">Distance threshold:</string>
+    <string name="maximum_images">Maximum number of images:</string>
+
 </resources>

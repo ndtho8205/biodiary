@@ -3,11 +3,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
+    <edu.bk.thesis.biodiary.core.face.JavaCameraView
+        android:id="@+id/setup_face_camera_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <Button
+        android:id="@+id/setup_face_btn_take_picture"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="Set up face"
-        android:textColor="@android:color/white"
-        android:textSize="24sp" />
+        android:layout_height="wrap_content" />
 </RelativeLayout>
