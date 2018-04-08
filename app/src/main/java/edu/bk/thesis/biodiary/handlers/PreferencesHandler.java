@@ -74,4 +74,14 @@ public class PreferencesHandler
     {
         return mPref.getFloat(KEY_VOICE_COEFFICIENT, 0.5f);
     }
+
+    public float getFaceThreshold()
+    {
+        return -1.0f;
+    }
+
+    public float getFaceDistanceThreshold()
+    {
+        return -1.0f;
+    }
 }

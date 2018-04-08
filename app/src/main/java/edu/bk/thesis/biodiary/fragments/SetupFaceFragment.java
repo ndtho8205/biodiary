@@ -2,81 +2,60 @@ package edu.bk.thesis.biodiary.fragments;
 
 
 import android.Manifest;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
 
 import edu.bk.thesis.biodiary.R;
 import edu.bk.thesis.biodiary.core.face.CameraBridgeViewBase;
 import edu.bk.thesis.biodiary.core.face.NativeMethods;
+import edu.bk.thesis.biodiary.core.face.NativeMethods.TrainFacesTask;
 import edu.bk.thesis.biodiary.core.face.TinyDB;
 
 
 public class SetupFaceFragment extends Fragment
         implements CameraBridgeViewBase.CvCameraViewListener2
 {
-
-
     private static final String TAG                      = SetupFaceFragment.class.getSimpleName();
     private static final int    PERMISSIONS_REQUEST_CODE = 0;
+    private static final String LABEL                    = "user";
+
     private ArrayList<Mat>       images;
-    private ArrayList<String>    imagesLabels;
-    private String[]             uniqueLabels;
     private CameraBridgeViewBase mOpenCvCameraView;
     private Mat                  mRgba, mGray;
-    private Toast   mToast;
-    private boolean useEigenfaces;
-    private float   faceThreshold, distanceThreshold;
-    private int                          maximumImages;
-    private SharedPreferences            prefs;
-    private TinyDB                       tinydb;
-    private NativeMethods.TrainFacesTask mTrainFacesTask;
-    private NativeMethods.TrainFacesTask.Callback  trainFacesTaskCallback
-                                                                   = new NativeMethods.TrainFacesTask.Callback()
+    private Toast mToast;
+    private float faceThreshold, distanceThreshold;
+    private int               maximumImages;
+    private SharedPreferences prefs;
+    private TinyDB            tinydb;
+
+    private TrainFacesTask mTrainFacesTask;
+    private TrainFacesTask.Callback trainFacesTaskCallback = new TrainFacesTask.Callback()
     {
         @Override
         public void onTrainFacesComplete(boolean result)
@@ -89,67 +68,8 @@ public class SetupFaceFragment extends Fragment
             }
         }
     };
-    private NativeMethods.MeasureDistTask.Callback measureDistTaskCallback
-                                                                   = new NativeMethods.MeasureDistTask.Callback()
-    {
-        @Override
-        public void onMeasureDistComplete(Bundle bundle)
-        {
-            if (bundle == null) {
-                showToast("Failed to measure distance", Toast.LENGTH_LONG);
-                return;
-            }
 
-            float minDist = bundle.getFloat(NativeMethods.MeasureDistTask.MIN_DIST_FLOAT);
-            if (minDist != -1) {
-                int   minIndex = bundle.getInt(NativeMethods.MeasureDistTask.MIN_DIST_INDEX_INT);
-                float faceDist = bundle.getFloat(NativeMethods.MeasureDistTask.DIST_FACE_FLOAT);
-                if (imagesLabels.size() > minIndex) { // Just to be sure
-                    Log.i(TAG,
-                          "dist[" + minIndex + "]: " + minDist + ", face dist: " + faceDist +
-                          ", label: " + imagesLabels.get(minIndex));
-
-                    String minDistString  = String.format(Locale.US, "%.4f", minDist);
-                    String faceDistString = String.format(Locale.US, "%.4f", faceDist);
-
-                    if (faceDist < faceThreshold &&
-                        minDist < distanceThreshold) // 1. Near face space and near a face class
-                    {
-                        showToast("Face detected: " + imagesLabels.get(minIndex) + ". Distance: " +
-                                  minDistString, Toast.LENGTH_LONG);
-                    }
-                    else if (faceDist <
-                             faceThreshold) // 2. Near face space but not near a known face class
-                    {
-                        showToast("Unknown face. Face distance: " + faceDistString +
-                                  ". Closest Distance: " + minDistString, Toast.LENGTH_LONG);
-                    }
-                    else if (minDist <
-                             distanceThreshold) // 3. Distant from face space and near a face class
-                    {
-                        showToast("False recognition. Face distance: " + faceDistString +
-                                  ". Closest Distance: " + minDistString, Toast.LENGTH_LONG);
-                    }
-                    else // 4. Distant from face space and not near a known face class.
-                    {
-                        showToast("Image is not a face. Face distance: " + faceDistString +
-                                  ". Closest Distance: " + minDistString, Toast.LENGTH_LONG);
-                    }
-                }
-            }
-            else {
-                Log.w(TAG, "Array is null");
-                if (useEigenfaces || uniqueLabels == null || uniqueLabels.length > 1) {
-                    showToast("Keep training...", Toast.LENGTH_SHORT);
-                }
-                else {
-                    showToast("Fisherfaces needs two different faces", Toast.LENGTH_SHORT);
-                }
-            }
-        }
-    };
-    private BaseLoaderCallback                     mLoaderCallback = new BaseLoaderCallback(
-            getContext())
+    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(getContext())
     {
         @Override
         public void onManagerConnected(int status)
@@ -162,18 +82,15 @@ public class SetupFaceFragment extends Fragment
 
                     // Read images and labels from shared preferences
                     images = tinydb.getListMat("images");
-                    imagesLabels = tinydb.getListString("imagesLabels");
 
                     Log.i(TAG,
-                          "Number of images: " + images.size() + ". Number of labels: " +
-                          imagesLabels.size());
+                          "Number of images: " + images.size());
                     if (!images.isEmpty()) {
                         trainFaces(); // Train images after they are loaded
                         Log.i(TAG,
                               "Images height: " + images.get(0).height() + " Width: " +
                               images.get(0).width() + " total: " + images.get(0).total());
                     }
-                    Log.i(TAG, "Labels: " + imagesLabels);
 
                     break;
                 default:
@@ -189,21 +106,10 @@ public class SetupFaceFragment extends Fragment
             throw new IllegalArgumentException();
         }
         if (mToast != null && mToast.getView().isShown()) {
-            mToast.cancel(); // Close the toast if it is already open
+            mToast.cancel();
         }
         mToast = Toast.makeText(getContext(), message, duration);
         mToast.show();
-    }
-
-    private void addLabel(String string)
-    {
-        String label = string.substring(0, 1).toUpperCase(Locale.US) + string.substring(1)
-                                                                             .trim()
-                                                                             .toLowerCase(Locale.US); // Make sure that the name is always uppercase and rest is lowercase
-        imagesLabels.add(label); // Add label to list of labels
-        Log.i(TAG, "Label: " + label);
-
-        trainFaces(); // When we have finished setting the label, then retrain faces
     }
 
     /**
@@ -234,172 +140,15 @@ public class SetupFaceFragment extends Fragment
               "Images height: " + imagesMatrix.height() + " Width: " + imagesMatrix.width() +
               " total: " + imagesMatrix.total());
 
-        // Train the face recognition algorithms in an asynchronous task, so we do not skip any frames
-        if (useEigenfaces) {
-            Log.i(TAG, "Training Eigenfaces");
-            showToast("Training " + getResources().getString(R.string.eigenfaces),
-                      Toast.LENGTH_SHORT);
+        Log.i(TAG, "Training Eigenfaces");
+        showToast("Training " + getResources().getString(R.string.eigenfaces),
+                  Toast.LENGTH_SHORT);
 
-            mTrainFacesTask = new NativeMethods.TrainFacesTask(imagesMatrix,
-                                                               trainFacesTaskCallback);
-        }
-        else {
-            Log.i(TAG, "Training Fisherfaces");
-            showToast("Training " + getResources().getString(R.string.fisherfaces),
-                      Toast.LENGTH_SHORT);
+        mTrainFacesTask = new TrainFacesTask(imagesMatrix, trainFacesTaskCallback);
 
-            Set<String> uniqueLabelsSet = new HashSet<>(imagesLabels); // Get all unique labels
-            uniqueLabels
-                    = uniqueLabelsSet.toArray(new String[uniqueLabelsSet.size()]); // Convert to String array, so we can read the values from the indices
-
-            int[] classesNumbers = new int[uniqueLabels.length];
-            for (int i = 0; i < classesNumbers.length; i++) {
-                classesNumbers[i] = i +
-                                    1; // Create incrementing list for each unique label starting at 1
-            }
-
-            int[] classes = new int[imagesLabels.size()];
-            for (int i = 0; i < imagesLabels.size(); i++) {
-                String label = imagesLabels.get(i);
-                for (int j = 0; j < uniqueLabels.length; j++) {
-                    if (label.equals(uniqueLabels[j])) {
-                        classes[i] = classesNumbers[j]; // Insert corresponding number
-                        break;
-                    }
-                }
-            }
-
-            /*for (int i = 0; i < imagesLabels.size(); i++)
-                Log.i(TAG, "Classes: " + imagesLabels.get(i) + " = " + classes[i]);*/
-
-            Mat vectorClasses = new Mat(classes.length, 1, CvType.CV_32S); // CV_32S == int
-            vectorClasses.put(0, 0, classes); // Copy int array into a vector
-
-            mTrainFacesTask = new NativeMethods.TrainFacesTask(imagesMatrix,
-                                                               vectorClasses,
-                                                               trainFacesTaskCallback);
-        }
         mTrainFacesTask.execute();
 
         return true;
-    }
-
-    private void showLabelsDialog()
-    {
-        Set<String> uniqueLabelsSet = new HashSet<>(imagesLabels); // Get all unique labels
-        if (!uniqueLabelsSet.isEmpty()) { // Make sure that there are any labels
-            // Inspired by: http://stackoverflow.com/questions/15762905/how-can-i-display-a-list-view-in-an-android-alert-dialog
-            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-            builder.setTitle("Select label:");
-            builder.setPositiveButton("New face", new DialogInterface.OnClickListener()
-            {
-                @Override
-                public void onClick(DialogInterface dialog, int which)
-                {
-                    dialog.dismiss();
-                    showEnterLabelDialog();
-                }
-            });
-            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
-            {
-                @Override
-                public void onClick(DialogInterface dialog, int which)
-                {
-                    dialog.dismiss();
-                    images.remove(images.size() - 1); // Remove last image
-                }
-            });
-            builder.setCancelable(false); // Prevent the user from closing the dialog
-
-            String[] uniqueLabels
-                    = uniqueLabelsSet.toArray(new String[uniqueLabelsSet.size()]); // Convert to String array for ArrayAdapter
-            Arrays.sort(uniqueLabels); // Sort labels alphabetically
-            final ArrayAdapter<String>
-                    arrayAdapter = new ArrayAdapter<String>(getContext(),
-                                                            android.R.layout.simple_list_item_1,
-                                                            uniqueLabels)
-            {
-                @Override
-                public @NonNull
-                View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent)
-                {
-                    TextView textView = (TextView) super.getView(position, convertView, parent);
-                    textView.setTextSize(18); // Increase text size a little bit
-                    return textView;
-                }
-            };
-            ListView mListView = new ListView(getContext());
-            mListView.setAdapter(arrayAdapter); // Set adapter, so the items actually show up
-            builder.setView(mListView); // Set the ListView
-
-            final AlertDialog dialog
-                    = builder.show(); // Show dialog and store in final variable, so it can be dismissed by the ListView
-
-            mListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
-            {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id)
-                {
-                    dialog.dismiss();
-                    addLabel(arrayAdapter.getItem(position));
-                }
-            });
-        }
-        else {
-            showEnterLabelDialog(); // If there is no existing labels, then ask the user for a new label
-        }
-    }
-
-    private void showEnterLabelDialog()
-    {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Please enter your name:");
-
-        final EditText input = new EditText(getContext());
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        builder.setView(input);
-
-        builder.setPositiveButton("Submit",
-                                  null); // Set up positive button, but do not provide a listener, so we can check the string before dismissing the dialog
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
-        {
-            @Override
-            public void onClick(DialogInterface dialog, int which)
-            {
-                dialog.dismiss();
-                images.remove(images.size() - 1); // Remove last image
-            }
-        });
-        builder.setCancelable(false); // User has to input a name
-        AlertDialog dialog = builder.create();
-
-        // Source: http://stackoverflow.com/a/7636468/2175837
-        dialog.setOnShowListener(new DialogInterface.OnShowListener()
-        {
-            @Override
-            public void onShow(final DialogInterface dialog)
-            {
-                Button mButton = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
-                mButton.setOnClickListener(new View.OnClickListener()
-                {
-                    @Override
-                    public void onClick(View view)
-                    {
-                        String string = input.getText().toString().trim();
-                        if (!string.isEmpty()) { // Make sure the input is valid
-                            // If input is valid, dismiss the dialog and add the label to the array
-                            dialog.dismiss();
-                            addLabel(string);
-                        }
-                    }
-                });
-            }
-        });
-
-        // Show keyboard, so the user can start typing straight away
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-
-        dialog.show();
     }
 
     @Override
@@ -415,7 +164,6 @@ public class SetupFaceFragment extends Fragment
 
         // Set radio button based on value stored in shared preferences
         prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-        useEigenfaces = prefs.getBoolean("useEigenfaces", false);
 
         tinydb = new TinyDB(getContext()); // Used to store ArrayLists in the shared preferences
 
@@ -423,17 +171,10 @@ public class SetupFaceFragment extends Fragment
         view.findViewById(R.id.setup_face_btn_take_picture)
             .setOnClickListener(new View.OnClickListener()
             {
-                NativeMethods.MeasureDistTask mMeasureDistTask;
 
                 @Override
                 public void onClick(View v)
                 {
-                    if (mMeasureDistTask != null &&
-                        mMeasureDistTask.getStatus() != AsyncTask.Status.FINISHED) {
-                        Log.i(TAG, "mMeasureDistTask is still running");
-                        showToast("Still processing old image...", Toast.LENGTH_SHORT);
-                        return;
-                    }
                     if (mTrainFacesTask != null &&
                         mTrainFacesTask.getStatus() != AsyncTask.Status.FINISHED) {
                         Log.i(TAG, "mTrainFacesTask is still running");
@@ -466,22 +207,16 @@ public class SetupFaceFragment extends Fragment
 
                     if (images.size() > maximumImages) {
                         images.remove(0); // Remove first image
-                        imagesLabels.remove(0); // Remove first label
+//                        imagesLabels.remove(0); // Remove first label
                         Log.i(TAG, "The number of images is limited to: " + images.size());
                     }
 
-                    // Calculate normalized Euclidean distance
-                    mMeasureDistTask = new NativeMethods.MeasureDistTask(useEigenfaces,
-                                                                         measureDistTaskCallback);
-                    mMeasureDistTask.execute(image);
-
-                    showLabelsDialog();
+                    trainFaces();
                 }
             });
 
-        mOpenCvCameraView = (CameraBridgeViewBase) view.findViewById(R.id.setup_face_camera_view);
-        mOpenCvCameraView.setCameraIndex(prefs.getInt("mCameraIndex",
-                                                      CameraBridgeViewBase.CAMERA_ID_FRONT));
+        mOpenCvCameraView = view.findViewById(R.id.setup_face_camera_view);
+        mOpenCvCameraView.setCameraIndex(CameraBridgeViewBase.CAMERA_ID_FRONT);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
 
@@ -493,17 +228,15 @@ public class SetupFaceFragment extends Fragment
                                            @NonNull String permissions[],
                                            @NonNull int[] grantResults)
     {
-        switch (requestCode) {
-            case PERMISSIONS_REQUEST_CODE:
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 &&
-                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    loadOpenCV();
-                }
-                else {
-                    showToast("Permission required!", Toast.LENGTH_LONG);
-                    getActivity().finish();
-                }
+        if (requestCode == PERMISSIONS_REQUEST_CODE) {
+            // If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                loadOpenCV();
+            }
+            else {
+                showToast("Permission required!", Toast.LENGTH_LONG);
+                getActivity().finish();
+            }
         }
     }
 
@@ -511,6 +244,7 @@ public class SetupFaceFragment extends Fragment
     public void onPause()
     {
         super.onPause();
+
         if (mOpenCvCameraView != null) {
             mOpenCvCameraView.disableView();
         }
@@ -520,6 +254,7 @@ public class SetupFaceFragment extends Fragment
     public void onStart()
     {
         super.onStart();
+
         // Read threshold values
         float progress = prefs.getFloat("faceThreshold", -1);
         if (progress != -1) {
@@ -541,14 +276,13 @@ public class SetupFaceFragment extends Fragment
         editor.putFloat("faceThreshold", faceThreshold);
         editor.putFloat("distanceThreshold", distanceThreshold);
         editor.putInt("maximumImages", maximumImages);
-        editor.putBoolean("useEigenfaces", useEigenfaces);
         editor.putInt("mCameraIndex", mOpenCvCameraView.mCameraIndex);
         editor.apply();
 
         // Store ArrayLists containing the images and labels
-        if (images != null && imagesLabels != null) {
+        if (images != null) {
             tinydb.putListMat("images", images);
-            tinydb.putListString("imagesLabels", imagesLabels);
+//            tinydb.putListString("imagesLabels", imagesLabels);
         }
     }
 
@@ -560,10 +294,9 @@ public class SetupFaceFragment extends Fragment
         // Request permission if needed
         if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(),
                                               Manifest.permission.CAMERA) !=
-            PackageManager.PERMISSION_GRANTED/* || ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED*/) {
+            PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(getActivity(),
-                                              new String[]{ Manifest.permission.CAMERA
-/*, Manifest.permission.WRITE_EXTERNAL_STORAGE*/ },
+                                              new String[]{ Manifest.permission.CAMERA },
                                               PERMISSIONS_REQUEST_CODE);
         }
         else {
@@ -590,6 +323,7 @@ public class SetupFaceFragment extends Fragment
     public void onDestroy()
     {
         super.onDestroy();
+
         if (mOpenCvCameraView != null) {
             mOpenCvCameraView.disableView();
         }
@@ -614,92 +348,61 @@ public class SetupFaceFragment extends Fragment
 
         // Flip image to get mirror effect
         int orientation = mOpenCvCameraView.getScreenOrientation();
-        if (mOpenCvCameraView.isEmulator()) // Treat emulators as a special case
-        {
-            Core.flip(mRgbaTmp, mRgbaTmp, 1); // Flip along y-axis
+//        if (mOpenCvCameraView.isEmulator()) // Treat emulators as a special case
+//        {
+//            Core.flip(mRgbaTmp, mRgbaTmp, 1); // Flip along y-axis
+//        }
+//        else {
+        switch (orientation) { // RGB image
+            case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
+            case ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT:
+                if (mOpenCvCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_FRONT) {
+                    Core.flip(mRgbaTmp, mRgbaTmp, 0); // Flip along x-axis
+                }
+                else {
+                    Core.flip(mRgbaTmp, mRgbaTmp, -1); // Flip along both axis
+                }
+                break;
+            case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
+            case ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE:
+                if (mOpenCvCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_FRONT) {
+                    Core.flip(mRgbaTmp, mRgbaTmp, 1); // Flip along y-axis
+                }
+                break;
         }
-        else {
-            switch (orientation) { // RGB image
-                case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
-                case ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT:
-                    if (mOpenCvCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_FRONT) {
-                        Core.flip(mRgbaTmp, mRgbaTmp, 0); // Flip along x-axis
-                    }
-                    else {
-                        Core.flip(mRgbaTmp, mRgbaTmp, -1); // Flip along both axis
-                    }
-                    break;
-                case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
-                case ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE:
-                    if (mOpenCvCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_FRONT) {
-                        Core.flip(mRgbaTmp, mRgbaTmp, 1); // Flip along y-axis
-                    }
-                    break;
-            }
-            switch (orientation) { // Grayscale image
-                case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
-                    Core.transpose(mGrayTmp, mGrayTmp); // Rotate image
-                    if (mOpenCvCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_FRONT) {
-                        Core.flip(mGrayTmp, mGrayTmp, -1); // Flip along both axis
-                    }
-                    else {
-                        Core.flip(mGrayTmp, mGrayTmp, 1); // Flip along y-axis
-                    }
-                    break;
-                case ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT:
-                    Core.transpose(mGrayTmp, mGrayTmp); // Rotate image
-                    if (mOpenCvCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_BACK) {
-                        Core.flip(mGrayTmp, mGrayTmp, 0); // Flip along x-axis
-                    }
-                    break;
-                case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
-                    if (mOpenCvCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_FRONT) {
-                        Core.flip(mGrayTmp, mGrayTmp, 1); // Flip along y-axis
-                    }
-                    break;
-                case ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE:
+        switch (orientation) { // Grayscale image
+            case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
+                Core.transpose(mGrayTmp, mGrayTmp); // Rotate image
+                if (mOpenCvCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_FRONT) {
+                    Core.flip(mGrayTmp, mGrayTmp, -1); // Flip along both axis
+                }
+                else {
+                    Core.flip(mGrayTmp, mGrayTmp, 1); // Flip along y-axis
+                }
+                break;
+            case ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT:
+                Core.transpose(mGrayTmp, mGrayTmp); // Rotate image
+                if (mOpenCvCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_BACK) {
                     Core.flip(mGrayTmp, mGrayTmp, 0); // Flip along x-axis
-                    if (mOpenCvCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_BACK) {
-                        Core.flip(mGrayTmp, mGrayTmp, 1); // Flip along y-axis
-                    }
-                    break;
-            }
+                }
+                break;
+            case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
+                if (mOpenCvCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_FRONT) {
+                    Core.flip(mGrayTmp, mGrayTmp, 1); // Flip along y-axis
+                }
+                break;
+            case ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE:
+                Core.flip(mGrayTmp, mGrayTmp, 0); // Flip along x-axis
+                if (mOpenCvCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_BACK) {
+                    Core.flip(mGrayTmp, mGrayTmp, 1); // Flip along y-axis
+                }
+                break;
         }
+//        }
 
         mGray = mGrayTmp;
         mRgba = mRgbaTmp;
 
         return mRgba;
-    }
-
-    @SuppressWarnings ("ResultOfMethodCallIgnored")
-    public void SaveImage(Mat mat)
-    {
-        Mat mIntermediateMat = new Mat();
-
-        if (mat.channels() == 1) // Grayscale image
-        {
-            Imgproc.cvtColor(mat, mIntermediateMat, Imgproc.COLOR_GRAY2BGR);
-        }
-        else {
-            Imgproc.cvtColor(mat, mIntermediateMat, Imgproc.COLOR_RGBA2BGR);
-        }
-
-        File path
-                = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                           TAG); // Save pictures in Pictures directory
-        path.mkdir(); // Create directory if needed
-        String fileName = "IMG_" + new SimpleDateFormat("yyyyMMdd_HHmmss_SSS",
-                                                        Locale.US).format(new Date()) + ".png";
-        File file = new File(path, fileName);
-
-        boolean bool = Imgcodecs.imwrite(file.toString(), mIntermediateMat);
-
-        if (bool) {
-            Log.i(TAG, "SUCCESS writing image to external storage");
-        }
-        else {
-            Log.e(TAG, "Failed writing image to external storage");
-        }
     }
 }
