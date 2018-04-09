@@ -1,8 +1,10 @@
 LOCAL_PATH := $(call my-dir)
-OPENCV_ANDROID_SDK := /home/ndtho8205/Downloads/OpenCV-android-sdk
-EIGEN3_DIR := /home/ndtho8205/Downloads/eigen-eigen-5a0156e40feb
 
 include $(CLEAR_VARS)
+
+LIBS_PATH := $(LOCAL_PATH)/../../../libs
+OPENCV_ANDROID_SDK := $(LIBS_PATH)/OpenCV-android-sdk
+EIGEN3_DIR := $(LIBS_PATH)/eigen
 
 OPENCV_INSTALL_MODULES := on
 include $(OPENCV_ANDROID_SDK)/sdk/native/jni/OpenCV.mk
