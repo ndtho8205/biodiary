@@ -10,7 +10,6 @@ import org.opencv.core.Mat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
 
 
 public class PreferencesHandler
@@ -123,7 +122,6 @@ public class PreferencesHandler
         mPref.edit().putString(key, TextUtils.join("‚‗‚", myStringList)).apply();
     }
 
-
     public void putListMat(String key, ArrayList<Mat> objArray)
     {
         ArrayList<String> objStrings = new ArrayList<String>();
@@ -136,15 +134,5 @@ public class PreferencesHandler
             objStrings.add(dataString);
         }
         putListString(key, objStrings);
-    }
-
-    public void remove(String key)
-    {
-        mEditor.remove(key).commit();
-    }
-
-    public Map<String, ?> getAll()
-    {
-        return mPref.getAll();
     }
 }

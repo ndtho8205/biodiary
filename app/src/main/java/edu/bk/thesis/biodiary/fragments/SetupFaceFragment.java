@@ -1,6 +1,5 @@
 package edu.bk.thesis.biodiary.fragments;
 
-
 import android.Manifest;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -43,21 +42,20 @@ public class SetupFaceFragment extends Fragment
 {
     private static final String TAG                      = SetupFaceFragment.class.getSimpleName();
     private static final int    PERMISSIONS_REQUEST_CODE = 0;
+    private static final int    MAXIMUM_IMAGES           = 10;
 
     private Button               mNextStepButton;
     private ImageButton          mTakePictureButton;
     private CameraBridgeViewBase mCameraView;
 
+    private Toast              mToast;
     private PreferencesHandler mPreferencesHandler;
 
     private ArrayList<Mat> mUserImages;
     private Mat            mRgba, mGray;
-    private Toast mToast;
-    private int   maximumImages;
-
 
     private TrainFacesTask mTrainFacesTask;
-    private TrainFacesTask.Callback trainFacesTaskCallback = new TrainFacesTask.Callback()
+    private TrainFacesTask.Callback mTrainFacesTaskCallback = new TrainFacesTask.Callback()
     {
         @Override
         public void onTrainFacesComplete(boolean result)
@@ -84,11 +82,12 @@ public class SetupFaceFragment extends Fragment
 
                     mUserImages
                             = mPreferencesHandler.getListMat(PreferencesHandler.KEY_USER_IMAGES);
-                    Log.i(TAG, "Number of images: " + mUserImages.size());
+                    Log.i(TAG, "Number of user images loaded: " + mUserImages.size());
                     if (!mUserImages.isEmpty()) {
                         trainFaces();
                         Log.i(TAG,
-                              "Images height: " + mUserImages.get(0).height() + " Width: " +
+                              "Loaded User Images height: " + mUserImages.get(0).height() +
+                              " Width: " +
                               mUserImages.get(0).width() + " total: " + mUserImages.get(0).total());
                     }
 
@@ -99,52 +98,6 @@ public class SetupFaceFragment extends Fragment
             }
         }
     };
-
-    private void showToast(String message, int duration)
-    {
-        if (duration != Toast.LENGTH_SHORT && duration != Toast.LENGTH_LONG) {
-            throw new IllegalArgumentException();
-        }
-        if (mToast != null && mToast.getView().isShown()) {
-            mToast.cancel();
-        }
-        mToast = Toast.makeText(getContext(), message, duration);
-        mToast.show();
-    }
-
-    private boolean trainFaces()
-    {
-        if (mUserImages.isEmpty()) {
-            return true;
-        }
-
-        if (mTrainFacesTask != null && mTrainFacesTask.getStatus() != AsyncTask.Status.FINISHED) {
-            Log.i(TAG, "mTrainFacesTask is still running");
-            return false;
-        }
-
-        Mat imagesMatrix = new Mat((int) mUserImages.get(0).total(),
-                                   mUserImages.size(),
-                                   mUserImages.get(0).type());
-        for (int i = 0; i < mUserImages.size(); i++) {
-            mUserImages.get(i)
-                       .copyTo(imagesMatrix.col(i)); // Create matrix where each image is represented as a column vector
-        }
-
-        Log.i(TAG,
-              "Images height: " + imagesMatrix.height() + " Width: " + imagesMatrix.width() +
-              " total: " + imagesMatrix.total());
-
-        Log.i(TAG, "Training Eigenfaces");
-        showToast("Training " + getResources().getString(R.string.eigenfaces),
-                  Toast.LENGTH_SHORT);
-
-        mTrainFacesTask = new TrainFacesTask(imagesMatrix, trainFacesTaskCallback);
-
-        mTrainFacesTask.execute();
-
-        return true;
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -169,9 +122,7 @@ public class SetupFaceFragment extends Fragment
     {
         View view = inflater.inflate(R.layout.fragment_setup_face, container, false);
 
-
         getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
 
 //        mNextStepButton = view.findViewById(R.id.setup_face_btn_next);
 //        mNextStepButton.setOnClickListener(new View.OnClickListener()
@@ -189,6 +140,8 @@ public class SetupFaceFragment extends Fragment
             @Override
             public void onClick(View v)
             {
+                Log.i(TAG, "Take picture and start training");
+
                 if (mTrainFacesTask != null &&
                     mTrainFacesTask.getStatus() != AsyncTask.Status.FINISHED) {
                     Log.i(TAG, "mTrainFacesTask is still running");
@@ -212,7 +165,7 @@ public class SetupFaceFragment extends Fragment
                            " total: " + image.total());
                 mUserImages.add(image); // Add current image to the array
 
-                if (mUserImages.size() > maximumImages) {
+                if (mUserImages.size() > MAXIMUM_IMAGES) {
                     mUserImages.remove(0);
                     Log.i(TAG, "The number of images is limited to: " + mUserImages.size());
                 }
@@ -266,7 +219,8 @@ public class SetupFaceFragment extends Fragment
 
         // Store ArrayLists containing the images and labels
         if (mUserImages != null) {
-            mPreferencesHandler.putListMat("images", mUserImages);
+            mPreferencesHandler.putListMat(PreferencesHandler.KEY_USER_IMAGES, mUserImages);
+            Log.i(TAG, "Saved user images");
         }
     }
 
@@ -277,21 +231,6 @@ public class SetupFaceFragment extends Fragment
 
         if (mCameraView != null) {
             mCameraView.disableView();
-        }
-    }
-
-    private void loadOpenCV()
-    {
-        if (!OpenCVLoader.initDebug(true)) {
-            Log.d(TAG,
-                  "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_1_0,
-                                   getContext(),
-                                   mLoaderCallback);
-        }
-        else {
-            Log.d(TAG, "OpenCV library found inside package. Using it!");
-            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
     }
 
@@ -370,5 +309,61 @@ public class SetupFaceFragment extends Fragment
         mRgba = mRgbaTmp;
 
         return mRgba;
+    }
+
+    private void showToast(String message, int duration)
+    {
+        if (duration != Toast.LENGTH_SHORT && duration != Toast.LENGTH_LONG) {
+            throw new IllegalArgumentException();
+        }
+        if (mToast != null && mToast.getView().isShown()) {
+            mToast.cancel();
+        }
+        mToast = Toast.makeText(getContext(), message, duration);
+        mToast.show();
+    }
+
+    private boolean trainFaces()
+    {
+        if (mUserImages.isEmpty()) {
+            return true;
+        }
+
+        if (mTrainFacesTask != null && mTrainFacesTask.getStatus() != AsyncTask.Status.FINISHED) {
+            Log.i(TAG, "mTrainFacesTask is still running");
+            return false;
+        }
+
+        Mat imagesMatrix = new Mat((int) mUserImages.get(0).total(),
+                                   mUserImages.size(),
+                                   mUserImages.get(0).type());
+        for (int i = 0; i < mUserImages.size(); i++) {
+            mUserImages.get(i)
+                       .copyTo(imagesMatrix.col(i)); // Create matrix where each image is represented as a column vector
+        }
+        Log.i(TAG,
+              "Images height: " + imagesMatrix.height() + " Width: " + imagesMatrix.width() +
+              " total: " + imagesMatrix.total());
+
+        Log.i(TAG, "Training Eigenfaces");
+        mTrainFacesTask = new TrainFacesTask(imagesMatrix, mTrainFacesTaskCallback);
+        mTrainFacesTask.execute();
+
+        return true;
+    }
+
+    private void loadOpenCV()
+    {
+        if (!OpenCVLoader.initDebug()) {
+            Log.d(TAG,
+                  "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_1_0,
+                                   getContext(),
+                                   mLoaderCallback);
+        }
+        else {
+            Log.d(TAG, "OpenCV library found inside package. Using it!");
+            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        }
     }
 }
