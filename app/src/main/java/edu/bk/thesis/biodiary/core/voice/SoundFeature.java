@@ -30,22 +30,22 @@ public class SoundFeature
     private static final int    RECORDER_SAMPLERATE         = 16000;
     private static final int    RECORDER_CHANNELS           = AudioFormat.CHANNEL_IN_MONO;
     private static final int    RECORDER_AUDIO_ENCODING     = AudioFormat.ENCODING_PCM_16BIT;
-    private static FeatureFileDumper sample;
-    private static FeatureFileDumper unlocker;
-    private static String               configFile = Environment.getExternalStorageDirectory() +
-                                                     "/config.xml";
-    private static ConfigurationManager cm         = new ConfigurationManager(configFile);
-    private static FrontEnd             frontend   = (FrontEnd) cm.lookup("mfcFrontEnd");
-    private static MediaRecorder        mRecorder  = null;
-    private static int                  bufferSize = AudioRecord.getMinBufferSize
+    private FeatureFileDumper sample;
+    private FeatureFileDumper unlocker;
+    private String               configFile = Environment.getExternalStorageDirectory() +
+                                              "/config.xml";
+    private ConfigurationManager cm         = new ConfigurationManager(configFile);
+    private FrontEnd             frontend   = (FrontEnd) cm.lookup("mfcFrontEnd");
+    private MediaRecorder        mRecorder  = null;
+    private int                  bufferSize = AudioRecord.getMinBufferSize
             (RECORDER_SAMPLERATE, RECORDER_CHANNELS, RECORDER_AUDIO_ENCODING) * 3;
 
 
-    private static AudioRecord recorder        = null;
-    private static Thread      recordingThread = null;
-    private static boolean     isRecording     = false;
+    private AudioRecord recorder        = null;
+    private Thread      recordingThread = null;
+    private boolean     isRecording     = false;
 
-    public static double main(String[] args) throws Exception
+    public double main(String[] args) throws Exception
     {
         System.out.println("prepare");
 
@@ -54,7 +54,7 @@ public class SoundFeature
         return run();
     }
 
-    public static double run()
+    public double run()
     {
         try {
             System.out.println("prepare");
@@ -70,7 +70,7 @@ public class SoundFeature
 
     }
 
-    public static double compare() throws Exception
+    public double compare() throws Exception
     {
         double result = 0;
         getSample();
@@ -82,20 +82,20 @@ public class SoundFeature
         return result;
     }
 
-    public static void getSample() throws Exception
+    public void getSample() throws Exception
     {
         sample = new FeatureFileDumper(cm, "mfcFrontEnd");
         sample.processFile(Environment.getExternalStorageDirectory() + "/AudioRecorder/owner.wav");
     }
 
-    public static void getUnlocker() throws Exception
+    public void getUnlocker() throws Exception
     {
         unlocker = new FeatureFileDumper(cm, "mfcFrontEnd");
         unlocker.processFile(
                 Environment.getExternalStorageDirectory() + "/AudioRecorder/unlocker.wav");
     }
 
-    public static double[] ffdToArray(FeatureFileDumper ffd) throws Exception
+    public double[] ffdToArray(FeatureFileDumper ffd) throws Exception
     {
         Field field1 = ffd.getClass().getDeclaredField("allFeatures");
         field1.setAccessible(true);
@@ -110,12 +110,12 @@ public class SoundFeature
         return kq;
     }
 
-    public static Instance convertSoundtoInstance(double[] array)
+    public Instance convertSoundtoInstance(double[] array)
     {
         return new DenseInstance(array);
     }
 
-    public static double getScore(double[] sampleVoice, double[] unlockerVoice)
+    public double getScore(double[] sampleVoice, double[] unlockerVoice)
     {
         DTWcustom dtw = new DTWcustom();
         return dtw.measure(convertSoundtoInstance(sampleVoice),
@@ -123,7 +123,7 @@ public class SoundFeature
 
     }
 
-    public static void getOwner() throws Exception
+    public void getOwner() throws Exception
     {
         System.out.println("begin record");
         startRecording();
@@ -131,7 +131,7 @@ public class SoundFeature
         stopOwnerRecording();
     }
 
-    public static void getVoice() throws Exception
+    public void getVoice() throws Exception
     {
         System.out.println("begin record");
         startRecording();
@@ -139,7 +139,7 @@ public class SoundFeature
         stopUnlockerRecording();
     }
 
-    private static String getOwnerFilename()
+    private String getOwnerFilename()
     {
         String filepath = Environment.getExternalStorageDirectory().getPath();
         File   file     = new File(filepath, AUDIO_RECORDER_FOLDER);
@@ -151,7 +151,7 @@ public class SoundFeature
         return (file.getAbsolutePath() + "/" + "owner" + AUDIO_RECORDER_FILE_EXT_WAV);
     }
 
-    private static String getUnlockerFilename()
+    private String getUnlockerFilename()
     {
         String filepath = Environment.getExternalStorageDirectory().getPath();
         File   file     = new File(filepath, AUDIO_RECORDER_FOLDER);
@@ -163,7 +163,7 @@ public class SoundFeature
         return (file.getAbsolutePath() + "/" + "unlocker" + AUDIO_RECORDER_FILE_EXT_WAV);
     }
 
-    private static String getTempFilename()
+    private String getTempFilename()
     {
         String filepath = Environment.getExternalStorageDirectory().getPath();
         File   file     = new File(filepath, AUDIO_RECORDER_FOLDER);
@@ -181,7 +181,7 @@ public class SoundFeature
         return (file.getAbsolutePath() + "/" + AUDIO_RECORDER_TEMP_FILE);
     }
 
-    private static void startRecording()
+    private void startRecording()
     {
         recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
                                    RECORDER_SAMPLERATE,
@@ -209,7 +209,7 @@ public class SoundFeature
         recordingThread.start();
     }
 
-    private static void writeAudioDataToFile()
+    private void writeAudioDataToFile()
     {
         byte             data[]   = new byte[bufferSize];
         String           filename = getTempFilename();
@@ -248,7 +248,7 @@ public class SoundFeature
         }
     }
 
-    private static void stopOwnerRecording()
+    private void stopOwnerRecording()
     {
         if (null != recorder) {
             isRecording = false;
@@ -271,7 +271,7 @@ public class SoundFeature
         System.out.println("Deleted temp files");
     }
 
-    private static void stopUnlockerRecording()
+    private void stopUnlockerRecording()
     {
         if (null != recorder) {
             isRecording = false;
@@ -294,14 +294,14 @@ public class SoundFeature
     }
 
 
-    private static void deleteTempFile()
+    private void deleteTempFile()
     {
         File file = new File(getTempFilename());
 
         file.delete();
     }
 
-    private static void copyWaveFile(String inFilename, String outFilename)
+    private void copyWaveFile(String inFilename, String outFilename)
     {
         FileInputStream  in             = null;
         FileOutputStream out            = null;
@@ -337,7 +337,7 @@ public class SoundFeature
         }
     }
 
-    private static void WriteWaveFileHeader(
+    private void WriteWaveFileHeader(
             FileOutputStream out, long totalAudioLen,
             long totalDataLen, long longSampleRate, int channels,
             long byteRate) throws IOException

@@ -42,7 +42,7 @@ public class SetupFaceFragment extends Fragment
 {
     private static final String TAG                      = SetupFaceFragment.class.getSimpleName();
     private static final int    PERMISSIONS_REQUEST_CODE = 0;
-    private static final int    MAXIMUM_IMAGES           = 10;
+    private static final int    MAXIMUM_IMAGES           = 100;
 
     private Button               mNextStepButton;
     private ImageButton          mTakePictureButton;
@@ -170,7 +170,9 @@ public class SetupFaceFragment extends Fragment
                     Log.i(TAG, "The number of images is limited to: " + mUserImages.size());
                 }
 
-                trainFaces();
+                showToast("Image captured: " + mUserImages.size(), Toast.LENGTH_LONG);
+
+                //trainFaces();
             }
         });
 
@@ -216,6 +218,8 @@ public class SetupFaceFragment extends Fragment
     public void onStop()
     {
         super.onStop();
+
+        trainFaces();
 
         // Store ArrayLists containing the images and labels
         if (mUserImages != null) {
@@ -319,7 +323,7 @@ public class SetupFaceFragment extends Fragment
         if (mToast != null && mToast.getView().isShown()) {
             mToast.cancel();
         }
-        mToast = Toast.makeText(getContext(), message, duration);
+        mToast = Toast.makeText(getActivity().getApplicationContext(), message, duration);
         mToast.show();
     }
 
