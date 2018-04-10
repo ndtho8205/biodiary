@@ -13,6 +13,10 @@ import edu.bk.thesis.biodiary.adapters.SetupAdapter;
 
 public class SetupActivity extends AppCompatActivity
 {
+    public static final int SETUP_FACE_STEP   = 0;
+    public static final int SETUP_VOICE_STEP  = 1;
+    public static final int SETUP_FINISH_STEP = 2;
+
     private ViewPager         mViewPager;
     private PageIndicatorView mPageIndicator;
 
@@ -22,18 +26,18 @@ public class SetupActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setup);
 
+        mViewPager = findViewById(R.id.view_pager);
+        mPageIndicator = findViewById(R.id.page_indicator);
+
         initViews();
     }
 
     private void initViews()
     {
         SetupAdapter adapter = new SetupAdapter(getSupportFragmentManager());
+        mViewPager.setAdapter(adapter);
 
-        final ViewPager pager = findViewById(R.id.view_pager);
-        pager.setAdapter(adapter);
-
-        mPageIndicator = findViewById(R.id.page_indicator);
-        mPageIndicator.setViewPager(pager);
+        mPageIndicator.setViewPager(mViewPager);
     }
 
     public void setCurrentStep(int item)

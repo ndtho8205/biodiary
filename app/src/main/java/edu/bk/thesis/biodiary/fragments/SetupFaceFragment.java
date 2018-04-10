@@ -84,7 +84,7 @@ public class SetupFaceFragment extends Fragment
                             = mPreferencesHandler.getListMat(PreferencesHandler.KEY_USER_IMAGES);
                     Log.i(TAG, "Number of user images loaded: " + mUserImages.size());
                     if (!mUserImages.isEmpty()) {
-                        trainFaces();
+//                        trainFaces();
                         Log.i(TAG,
                               "Loaded User Images height: " + mUserImages.get(0).height() +
                               " Width: " +
