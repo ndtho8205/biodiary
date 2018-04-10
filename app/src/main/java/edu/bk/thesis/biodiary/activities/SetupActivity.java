@@ -6,7 +6,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
 import com.rd.PageIndicatorView;
-import com.rd.animation.type.AnimationType;
 
 import edu.bk.thesis.biodiary.R;
 import edu.bk.thesis.biodiary.adapters.SetupAdapter;
@@ -34,7 +33,6 @@ public class SetupActivity extends AppCompatActivity
         pager.setAdapter(adapter);
 
         mPageIndicator = findViewById(R.id.page_indicator);
-        mPageIndicator.setAnimationType(AnimationType.THIN_WORM);
         mPageIndicator.setViewPager(pager);
     }
 

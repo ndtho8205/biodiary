@@ -2,12 +2,10 @@ package edu.bk.thesis.biodiary.fragments;
 
 
 import android.Manifest;
-import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -19,6 +17,8 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -35,7 +35,7 @@ import edu.bk.thesis.biodiary.R;
 import edu.bk.thesis.biodiary.core.face.CameraBridgeViewBase;
 import edu.bk.thesis.biodiary.core.face.NativeMethods;
 import edu.bk.thesis.biodiary.core.face.NativeMethods.TrainFacesTask;
-import edu.bk.thesis.biodiary.core.face.TinyDB;
+import edu.bk.thesis.biodiary.handlers.PreferencesHandler;
 
 
 public class SetupFaceFragment extends Fragment
@@ -43,16 +43,18 @@ public class SetupFaceFragment extends Fragment
 {
     private static final String TAG                      = SetupFaceFragment.class.getSimpleName();
     private static final int    PERMISSIONS_REQUEST_CODE = 0;
-    private static final String LABEL                    = "user";
 
-    private ArrayList<Mat>       images;
-    private CameraBridgeViewBase mOpenCvCameraView;
-    private Mat                  mRgba, mGray;
+    private Button               mNextStepButton;
+    private ImageButton          mTakePictureButton;
+    private CameraBridgeViewBase mCameraView;
+
+    private PreferencesHandler mPreferencesHandler;
+
+    private ArrayList<Mat> mUserImages;
+    private Mat            mRgba, mGray;
     private Toast mToast;
-    private float faceThreshold, distanceThreshold;
-    private int               maximumImages;
-    private SharedPreferences prefs;
-    private TinyDB            tinydb;
+    private int   maximumImages;
+
 
     private TrainFacesTask mTrainFacesTask;
     private TrainFacesTask.Callback trainFacesTaskCallback = new TrainFacesTask.Callback()
@@ -76,20 +78,18 @@ public class SetupFaceFragment extends Fragment
         {
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS:
-                    NativeMethods.loadNativeLibraries(); // Load native libraries after(!) OpenCV initialization
+                    NativeMethods.loadNativeLibraries();
                     Log.i(TAG, "OpenCV loaded successfully");
-                    mOpenCvCameraView.enableView();
+                    mCameraView.enableView();
 
-                    // Read images and labels from shared preferences
-                    images = tinydb.getListMat("images");
-
-                    Log.i(TAG,
-                          "Number of images: " + images.size());
-                    if (!images.isEmpty()) {
-                        trainFaces(); // Train images after they are loaded
+                    mUserImages
+                            = mPreferencesHandler.getListMat(PreferencesHandler.KEY_USER_IMAGES);
+                    Log.i(TAG, "Number of images: " + mUserImages.size());
+                    if (!mUserImages.isEmpty()) {
+                        trainFaces();
                         Log.i(TAG,
-                              "Images height: " + images.get(0).height() + " Width: " +
-                              images.get(0).width() + " total: " + images.get(0).total());
+                              "Images height: " + mUserImages.get(0).height() + " Width: " +
+                              mUserImages.get(0).width() + " total: " + mUserImages.get(0).total());
                     }
 
                     break;
@@ -112,15 +112,10 @@ public class SetupFaceFragment extends Fragment
         mToast.show();
     }
 
-    /**
-     * Train faces using stored images.
-     *
-     * @return Returns false if the task is already running.
-     */
     private boolean trainFaces()
     {
-        if (images.isEmpty()) {
-            return true; // The array might be empty if the method is changed in the OnClickListener
+        if (mUserImages.isEmpty()) {
+            return true;
         }
 
         if (mTrainFacesTask != null && mTrainFacesTask.getStatus() != AsyncTask.Status.FINISHED) {
@@ -128,12 +123,12 @@ public class SetupFaceFragment extends Fragment
             return false;
         }
 
-        Mat imagesMatrix = new Mat((int) images.get(0).total(),
-                                   images.size(),
-                                   images.get(0).type());
-        for (int i = 0; i < images.size(); i++) {
-            images.get(i)
-                  .copyTo(imagesMatrix.col(i)); // Create matrix where each image is represented as a column vector
+        Mat imagesMatrix = new Mat((int) mUserImages.get(0).total(),
+                                   mUserImages.size(),
+                                   mUserImages.get(0).type());
+        for (int i = 0; i < mUserImages.size(); i++) {
+            mUserImages.get(i)
+                       .copyTo(imagesMatrix.col(i)); // Create matrix where each image is represented as a column vector
         }
 
         Log.i(TAG,
@@ -152,84 +147,11 @@ public class SetupFaceFragment extends Fragment
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState)
-    {
-        View view = inflater.inflate(R.layout.fragment_setup_face, container, false);
-
-
-        getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-
-        // Set radio button based on value stored in shared preferences
-        prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-
-        tinydb = new TinyDB(getContext()); // Used to store ArrayLists in the shared preferences
-
-
-        view.findViewById(R.id.setup_face_btn_take_picture)
-            .setOnClickListener(new View.OnClickListener()
-            {
-
-                @Override
-                public void onClick(View v)
-                {
-                    if (mTrainFacesTask != null &&
-                        mTrainFacesTask.getStatus() != AsyncTask.Status.FINISHED) {
-                        Log.i(TAG, "mTrainFacesTask is still running");
-                        showToast("Still training...", Toast.LENGTH_SHORT);
-                        return;
-                    }
-
-                    Log.i(TAG,
-                          "Gray height: " + mGray.height() + " Width: " + mGray.width() +
-                          " total: " +
-                          mGray.total());
-                    if (mGray.total() == 0) {
-                        return;
-                    }
-                    Size imageSize = new Size(200,
-                                              200.0f / ((float) mGray.width() /
-                                                        (float) mGray.height())); // Scale image in order to decrease computation time
-                    Imgproc.resize(mGray, mGray, imageSize);
-                    Log.i(TAG,
-                          "Small gray height: " + mGray.height() + " Width: " + mGray.width() +
-                          " total: " + mGray.total());
-                    //SaveImage(mGray);
-
-                    Mat image = mGray.reshape(0, (int) mGray.total()); // Create column vector
-                    Log.i(TAG,
-                          "Vector height: " + image.height() + " Width: " + image.width() +
-                          " total: " +
-                          image.total());
-                    images.add(image); // Add current image to the array
-
-                    if (images.size() > maximumImages) {
-                        images.remove(0); // Remove first image
-//                        imagesLabels.remove(0); // Remove first label
-                        Log.i(TAG, "The number of images is limited to: " + images.size());
-                    }
-
-                    trainFaces();
-                }
-            });
-
-        mOpenCvCameraView = view.findViewById(R.id.setup_face_camera_view);
-        mOpenCvCameraView.setCameraIndex(CameraBridgeViewBase.CAMERA_ID_FRONT);
-        mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
-        mOpenCvCameraView.setCvCameraViewListener(this);
-
-        return view;
-    }
-
-    @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String permissions[],
                                            @NonNull int[] grantResults)
     {
         if (requestCode == PERMISSIONS_REQUEST_CODE) {
-            // If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 loadOpenCV();
             }
@@ -241,49 +163,72 @@ public class SetupFaceFragment extends Fragment
     }
 
     @Override
-    public void onPause()
+    public View onCreateView(LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState)
     {
-        super.onPause();
+        View view = inflater.inflate(R.layout.fragment_setup_face, container, false);
 
-        if (mOpenCvCameraView != null) {
-            mOpenCvCameraView.disableView();
-        }
-    }
 
-    @Override
-    public void onStart()
-    {
-        super.onStart();
+        getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        // Read threshold values
-        float progress = prefs.getFloat("faceThreshold", -1);
-        if (progress != -1) {
-            faceThreshold = progress;
-        }
-        progress = prefs.getFloat("distanceThreshold", -1);
-        if (progress != -1) {
-            distanceThreshold = progress;
-        }
-        maximumImages = 25;
-    }
 
-    @Override
-    public void onStop()
-    {
-        super.onStop();
-        // Store threshold values
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putFloat("faceThreshold", faceThreshold);
-        editor.putFloat("distanceThreshold", distanceThreshold);
-        editor.putInt("maximumImages", maximumImages);
-        editor.putInt("mCameraIndex", mOpenCvCameraView.mCameraIndex);
-        editor.apply();
+//        mNextStepButton = view.findViewById(R.id.setup_face_btn_next);
+//        mNextStepButton.setOnClickListener(new View.OnClickListener()
+//        {
+//            @Override
+//            public void onClick(View v)
+//            {
+//                ((SetupActivity) getActivity()).setCurrentStep(1);
+//            }
+//        });
 
-        // Store ArrayLists containing the images and labels
-        if (images != null) {
-            tinydb.putListMat("images", images);
-//            tinydb.putListString("imagesLabels", imagesLabels);
-        }
+        mTakePictureButton = view.findViewById(R.id.setup_face_btn_take_picture);
+        mTakePictureButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                if (mTrainFacesTask != null &&
+                    mTrainFacesTask.getStatus() != AsyncTask.Status.FINISHED) {
+                    Log.i(TAG, "mTrainFacesTask is still running");
+                    showToast("Still training...", Toast.LENGTH_SHORT);
+                    return;
+                }
+
+                Log.i(TAG, "Gray height: " + mGray.height() + " Width: " + mGray.width() +
+                           " total: " + mGray.total());
+                if (mGray.total() == 0) {
+                    return;
+                }
+                Size imageSize = new Size(200, 200.0f / ((float) mGray.width() /
+                                                         (float) mGray.height()));
+                Imgproc.resize(mGray, mGray, imageSize);
+                Log.i(TAG, "Small gray height: " + mGray.height() + " Width: " + mGray.width() +
+                           " total: " + mGray.total());
+
+                Mat image = mGray.reshape(0, (int) mGray.total()); // Create column vector
+                Log.i(TAG, "Vector height: " + image.height() + " Width: " + image.width() +
+                           " total: " + image.total());
+                mUserImages.add(image); // Add current image to the array
+
+                if (mUserImages.size() > maximumImages) {
+                    mUserImages.remove(0);
+                    Log.i(TAG, "The number of images is limited to: " + mUserImages.size());
+                }
+
+                trainFaces();
+            }
+        });
+
+        mCameraView = view.findViewById(R.id.setup_face_camera_view);
+        mCameraView.setCameraIndex(CameraBridgeViewBase.CAMERA_ID_FRONT);
+        mCameraView.setVisibility(SurfaceView.VISIBLE);
+        mCameraView.setCvCameraViewListener(this);
+
+        mPreferencesHandler = new PreferencesHandler(getActivity().getApplicationContext());
+
+        return view;
     }
 
     @Override
@@ -304,6 +249,37 @@ public class SetupFaceFragment extends Fragment
         }
     }
 
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+
+        if (mCameraView != null) {
+            mCameraView.disableView();
+        }
+    }
+
+    @Override
+    public void onStop()
+    {
+        super.onStop();
+
+        // Store ArrayLists containing the images and labels
+        if (mUserImages != null) {
+            mPreferencesHandler.putListMat("images", mUserImages);
+        }
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+
+        if (mCameraView != null) {
+            mCameraView.disableView();
+        }
+    }
+
     private void loadOpenCV()
     {
         if (!OpenCVLoader.initDebug(true)) {
@@ -316,16 +292,6 @@ public class SetupFaceFragment extends Fragment
         else {
             Log.d(TAG, "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
-        }
-    }
-
-    @Override
-    public void onDestroy()
-    {
-        super.onDestroy();
-
-        if (mOpenCvCameraView != null) {
-            mOpenCvCameraView.disableView();
         }
     }
 
@@ -347,58 +313,58 @@ public class SetupFaceFragment extends Fragment
         Mat mRgbaTmp = inputFrame.rgba();
 
         // Flip image to get mirror effect
-        int orientation = mOpenCvCameraView.getScreenOrientation();
-//        if (mOpenCvCameraView.isEmulator()) // Treat emulators as a special case
-//        {
-//            Core.flip(mRgbaTmp, mRgbaTmp, 1); // Flip along y-axis
-//        }
-//        else {
-        switch (orientation) { // RGB image
-            case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
-            case ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT:
-                if (mOpenCvCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_FRONT) {
-                    Core.flip(mRgbaTmp, mRgbaTmp, 0); // Flip along x-axis
-                }
-                else {
-                    Core.flip(mRgbaTmp, mRgbaTmp, -1); // Flip along both axis
-                }
-                break;
-            case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
-            case ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE:
-                if (mOpenCvCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_FRONT) {
-                    Core.flip(mRgbaTmp, mRgbaTmp, 1); // Flip along y-axis
-                }
-                break;
+        int orientation = mCameraView.getScreenOrientation();
+        if (mCameraView.isEmulator()) // Treat emulators as a special case
+        {
+            Core.flip(mRgbaTmp, mRgbaTmp, 1); // Flip along y-axis
         }
-        switch (orientation) { // Grayscale image
-            case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
-                Core.transpose(mGrayTmp, mGrayTmp); // Rotate image
-                if (mOpenCvCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_FRONT) {
-                    Core.flip(mGrayTmp, mGrayTmp, -1); // Flip along both axis
-                }
-                else {
-                    Core.flip(mGrayTmp, mGrayTmp, 1); // Flip along y-axis
-                }
-                break;
-            case ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT:
-                Core.transpose(mGrayTmp, mGrayTmp); // Rotate image
-                if (mOpenCvCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_BACK) {
+        else {
+            switch (orientation) { // RGB image
+                case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
+                case ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT:
+                    if (mCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_FRONT) {
+                        Core.flip(mRgbaTmp, mRgbaTmp, 0); // Flip along x-axis
+                    }
+                    else {
+                        Core.flip(mRgbaTmp, mRgbaTmp, -1); // Flip along both axis
+                    }
+                    break;
+                case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
+                case ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE:
+                    if (mCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_FRONT) {
+                        Core.flip(mRgbaTmp, mRgbaTmp, 1); // Flip along y-axis
+                    }
+                    break;
+            }
+            switch (orientation) { // Grayscale image
+                case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
+                    Core.transpose(mGrayTmp, mGrayTmp); // Rotate image
+                    if (mCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_FRONT) {
+                        Core.flip(mGrayTmp, mGrayTmp, -1); // Flip along both axis
+                    }
+                    else {
+                        Core.flip(mGrayTmp, mGrayTmp, 1); // Flip along y-axis
+                    }
+                    break;
+                case ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT:
+                    Core.transpose(mGrayTmp, mGrayTmp); // Rotate image
+                    if (mCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_BACK) {
+                        Core.flip(mGrayTmp, mGrayTmp, 0); // Flip along x-axis
+                    }
+                    break;
+                case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
+                    if (mCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_FRONT) {
+                        Core.flip(mGrayTmp, mGrayTmp, 1); // Flip along y-axis
+                    }
+                    break;
+                case ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE:
                     Core.flip(mGrayTmp, mGrayTmp, 0); // Flip along x-axis
-                }
-                break;
-            case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
-                if (mOpenCvCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_FRONT) {
-                    Core.flip(mGrayTmp, mGrayTmp, 1); // Flip along y-axis
-                }
-                break;
-            case ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE:
-                Core.flip(mGrayTmp, mGrayTmp, 0); // Flip along x-axis
-                if (mOpenCvCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_BACK) {
-                    Core.flip(mGrayTmp, mGrayTmp, 1); // Flip along y-axis
-                }
-                break;
+                    if (mCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_BACK) {
+                        Core.flip(mGrayTmp, mGrayTmp, 1); // Flip along y-axis
+                    }
+                    break;
+            }
         }
-//        }
 
         mGray = mGrayTmp;
         mRgba = mRgbaTmp;
