@@ -14,6 +14,7 @@ import edu.bk.thesis.biodiary.core.voice.SoundFeature;
 
 public class SetupVoiceFragment extends Fragment
 {
+
     private Button       mRecordButton;
     private SoundFeature mSoundFeature;
 

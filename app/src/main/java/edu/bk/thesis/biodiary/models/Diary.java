@@ -11,6 +11,7 @@ import edu.bk.thesis.biodiary.utils.DateConverter;
 
 public class Diary implements Serializable
 {
+
     public static final String TABLE_NAME = "Diary";
 
     public static final String COLUMN_ID        = "id";
@@ -18,12 +19,12 @@ public class Diary implements Serializable
     public static final String COLUMN_DATE      = "date";
     public static final String COLUMN_CONTENT   = "content";
     public static final String CREATE_TABLE     =
-            "CREATE TABLE " + TABLE_NAME + "("
-            + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-            + COLUMN_TIMESTAMP + " INTEGER,"
-            + COLUMN_CONTENT + " TEXT,"
-            + COLUMN_DATE + " INTEGER"
-            + ")";
+        "CREATE TABLE " + TABLE_NAME + "("
+        + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+        + COLUMN_TIMESTAMP + " INTEGER,"
+        + COLUMN_CONTENT + " TEXT,"
+        + COLUMN_DATE + " INTEGER"
+        + ")";
 
     private List<Entry> mEntryList;
 
@@ -49,6 +50,7 @@ public class Diary implements Serializable
 
     public static class Entry implements Serializable
     {
+
         private long   mId;
         private long   mTimestamp;
         private String mContent;
@@ -70,7 +72,7 @@ public class Diary implements Serializable
         }
 
         public Entry(long id, long timestamp, String content, String date, String pattern)
-                throws ParseException
+            throws ParseException
         {
             mId = id;
             mTimestamp = timestamp;
@@ -117,14 +119,14 @@ public class Diary implements Serializable
             return DateConverter.millisecond2Date(mDate);
         }
 
-        public void setDate(Date date)
-        {
-            mDate = DateConverter.date2Millisecond(date);
-        }
-
         public void setDate(long date)
         {
             mDate = date;
+        }
+
+        public void setDate(Date date)
+        {
+            mDate = DateConverter.date2Millisecond(date);
         }
 
         public long getDateInMilisecond()

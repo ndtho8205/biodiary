@@ -11,6 +11,7 @@ import edu.bk.thesis.biodiary.fragments.SetupVoiceFragment;
 
 public class SetupAdapter extends FragmentPagerAdapter
 {
+
     private static int NUM_SETUP_STEPS = 3;
 
     public SetupAdapter(FragmentManager fragmentManager)
@@ -32,7 +33,6 @@ public class SetupAdapter extends FragmentPagerAdapter
                 return null;
         }
     }
-
 
     @Override
     public int getCount()

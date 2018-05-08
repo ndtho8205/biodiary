@@ -21,8 +21,9 @@ import edu.bk.thesis.biodiary.models.Diary;
 
 
 public class BioDiaryMainActivity extends AppCompatActivity
-        implements EntryListAdapter.DiaryAdapterOnClickHandler
+    implements EntryListAdapter.DiaryAdapterOnClickHandler
 {
+
     static final int ENTRY_CREATE_REQUEST = 1;
     static final int ENTRY_DETAIL_REQUEST = 2;
     static final int ENTRY_EDIT_REQUEST   = 3;
@@ -79,13 +80,6 @@ public class BioDiaryMainActivity extends AppCompatActivity
         handleEntryPressed(entry);
     }
 
-    private void handleEntryPressed(Diary.Entry entry)
-    {
-        Intent intentToStartEntryDetailActivity = new Intent(this, EntryDetailActivity.class);
-        intentToStartEntryDetailActivity.putExtra(Intent.EXTRA_TEXT, entry);
-        startActivityForResult(intentToStartEntryDetailActivity, ENTRY_DETAIL_REQUEST);
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -128,6 +122,35 @@ public class BioDiaryMainActivity extends AppCompatActivity
         toggleEmptyDiary();
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (resultCode == RESULT_OK) {
+            Diary.Entry entry
+                = (Diary.Entry) data.getSerializableExtra(Intent.EXTRA_TEXT);
+
+            switch (requestCode) {
+                case ENTRY_CREATE_REQUEST:
+                    handleEntryCreated(entry);
+                    break;
+                case ENTRY_DETAIL_REQUEST:
+                    if (data.hasExtra(EXTRA_DELETE_ENTRY)) {
+                        handleEntryDeleted(entry);
+                    }
+                    else {
+                        handleEntryEdited(entry);
+                    }
+            }
+        }
+    }
+
+    private void handleEntryPressed(Diary.Entry entry)
+    {
+        Intent intentToStartEntryDetailActivity = new Intent(this, EntryDetailActivity.class);
+        intentToStartEntryDetailActivity.putExtra(Intent.EXTRA_TEXT, entry);
+        startActivityForResult(intentToStartEntryDetailActivity, ENTRY_DETAIL_REQUEST);
+    }
+
     private void handleNewEntryButtonPressed()
     {
         Intent intentToStartEntryEditorActivity = new Intent(BioDiaryMainActivity.this,
@@ -143,28 +166,6 @@ public class BioDiaryMainActivity extends AppCompatActivity
         else {
             mEmptyDiaryNotify.setVisibility(View.VISIBLE);
             mNewEntryButton.setVisibility(View.VISIBLE);
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        if (resultCode == RESULT_OK) {
-            Diary.Entry entry
-                    = (Diary.Entry) data.getSerializableExtra(Intent.EXTRA_TEXT);
-
-            switch (requestCode) {
-                case ENTRY_CREATE_REQUEST:
-                    handleEntryCreated(entry);
-                    break;
-                case ENTRY_DETAIL_REQUEST:
-                    if (data.hasExtra(EXTRA_DELETE_ENTRY)) {
-                        handleEntryDeleted(entry);
-                    }
-                    else {
-                        handleEntryEdited(entry);
-                    }
-            }
         }
     }
 

@@ -9,6 +9,7 @@ import android.support.v4.app.ActivityCompat;
 
 public class PermissionHelper
 {
+
     public static boolean hasPermissions(Context context, String... permissions)
     {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null &&
@@ -29,4 +30,5 @@ public class PermissionHelper
             ActivityCompat.requestPermissions(activity, permissions, requestCode);
         }
     }
+
 }

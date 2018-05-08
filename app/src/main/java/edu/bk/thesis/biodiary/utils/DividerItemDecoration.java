@@ -14,6 +14,7 @@ import edu.bk.thesis.biodiary.R;
 
 public class DividerItemDecoration extends RecyclerView.ItemDecoration
 {
+
     public static final int MARGIN = 5;
     private Context  mContext;
     private Drawable mDivider;
@@ -37,7 +38,7 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration
             View child = parent.getChildAt(i);
 
             RecyclerView.LayoutParams layoutParams
-                    = (RecyclerView.LayoutParams) child.getLayoutParams();
+                = (RecyclerView.LayoutParams) child.getLayoutParams();
 
             int top    = child.getBottom() + layoutParams.bottomMargin;
             int bottom = top + mDivider.getIntrinsicHeight();

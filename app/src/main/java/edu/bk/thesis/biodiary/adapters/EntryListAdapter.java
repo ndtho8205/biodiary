@@ -13,8 +13,9 @@ import edu.bk.thesis.biodiary.utils.DateConverter;
 
 
 public class EntryListAdapter
-        extends RecyclerView.Adapter<EntryListAdapter.EntryListAdapterViewHolder>
+    extends RecyclerView.Adapter<EntryListAdapter.EntryListAdapterViewHolder>
 {
+
     private final DiaryAdapterOnClickHandler mClickHandler;
     private       Diary                      mDiary;
 
@@ -59,11 +60,13 @@ public class EntryListAdapter
 
     public interface DiaryAdapterOnClickHandler
     {
+
         void onClick(Diary.Entry entry);
     }
 
     class EntryListAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {
+
         final TextView mDate;
         final TextView mContent;
 

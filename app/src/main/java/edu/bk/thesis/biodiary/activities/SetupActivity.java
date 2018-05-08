@@ -13,12 +13,25 @@ import edu.bk.thesis.biodiary.adapters.SetupAdapter;
 
 public class SetupActivity extends AppCompatActivity
 {
+
     public static final int SETUP_FACE_STEP   = 0;
     public static final int SETUP_VOICE_STEP  = 1;
     public static final int SETUP_FINISH_STEP = 2;
 
     private ViewPager         mViewPager;
     private PageIndicatorView mPageIndicator;
+
+    public void setCurrentStep(int item)
+    {
+        mViewPager.setCurrentItem(item);
+    }
+
+    public void finishSetup()
+    {
+        startActivity(new Intent(getApplicationContext(),
+                                 SplashScreenActivity.class));
+        finish();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -38,17 +51,5 @@ public class SetupActivity extends AppCompatActivity
         mViewPager.setAdapter(adapter);
 
         mPageIndicator.setViewPager(mViewPager);
-    }
-
-    public void setCurrentStep(int item)
-    {
-        mViewPager.setCurrentItem(item);
-    }
-
-    public void finishSetup()
-    {
-        startActivity(new Intent(getApplicationContext(),
-                                 SplashScreenActivity.class));
-        finish();
     }
 }

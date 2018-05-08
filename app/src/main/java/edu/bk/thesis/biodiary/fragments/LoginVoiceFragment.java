@@ -15,6 +15,7 @@ import edu.bk.thesis.biodiary.core.voice.SoundFeature;
 
 public class LoginVoiceFragment extends Fragment
 {
+
     TextView textView;
     private Button       mRecordButton;
     private Button       mDoneButton;

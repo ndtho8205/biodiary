@@ -24,6 +24,7 @@ import edu.bk.thesis.biodiary.utils.DateConverter;
 
 public class EntryEditorActivity extends AppCompatActivity
 {
+
     private Toolbar   mToolbar;
     private ImageView mCloseButton;
 
@@ -77,7 +78,7 @@ public class EntryEditorActivity extends AppCompatActivity
         mCalendar = Calendar.getInstance();
 
         final DatePickerDialog.OnDateSetListener dateSetListener
-                = new DatePickerDialog.OnDateSetListener()
+            = new DatePickerDialog.OnDateSetListener()
         {
             @Override
             public void onDateSet(DatePicker datePicker, int year, int monthOfYear, int dayOfMonth)
@@ -166,11 +167,11 @@ public class EntryEditorActivity extends AppCompatActivity
             try {
                 result.putExtra(Intent.EXTRA_TEXT,
                                 new Diary.Entry(
-                                        mEntry.getId(),
-                                        mEntry.getTimestamp(),
-                                        mEntryContent.getText().toString(),
-                                        mEntryDate.getText().toString(),
-                                        DateConverter.PATTERN_SHORT_DATE));
+                                    mEntry.getId(),
+                                    mEntry.getTimestamp(),
+                                    mEntryContent.getText().toString(),
+                                    mEntryDate.getText().toString(),
+                                    DateConverter.PATTERN_SHORT_DATE));
             }
             catch (ParseException e) {
                 e.printStackTrace();

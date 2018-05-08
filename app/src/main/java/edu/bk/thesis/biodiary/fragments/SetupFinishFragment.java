@@ -15,6 +15,7 @@ import edu.bk.thesis.biodiary.handlers.PreferencesHandler;
 
 public class SetupFinishFragment extends Fragment
 {
+
     Button mFinishButton;
     private PreferencesHandler mPreferencesHandler;
 

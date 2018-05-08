@@ -6,9 +6,10 @@ import android.widget.Toast;
 
 public class MessageHelper
 {
-    public static Toast mToast;
 
-    private static void showToast(Context context, String message, int duration)
+    private static Toast mToast;
+
+    public static void showToast(Context context, String message, int duration)
     {
         if (duration != Toast.LENGTH_SHORT && duration != Toast.LENGTH_LONG) {
             throw new IllegalArgumentException();

@@ -22,6 +22,7 @@ import edu.bk.thesis.biodiary.utils.DateConverter;
 
 public class EntryDetailActivity extends AppCompatActivity
 {
+
     private Toolbar              mToolbar;
     private ImageView            mCloseButton;
     private FloatingActionButton mEditEntryButton;

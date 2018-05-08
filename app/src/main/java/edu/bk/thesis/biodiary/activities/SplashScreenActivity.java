@@ -5,11 +5,13 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import edu.bk.thesis.biodiary.core.face.Detection;
+import edu.bk.thesis.biodiary.core.face.Verification;
 import edu.bk.thesis.biodiary.handlers.PreferencesHandler;
 
 
 public class SplashScreenActivity extends AppCompatActivity
 {
+
     static final int SETUP_REQUEST = 1;
     static final int LOGIN_REQUEST = 1;
 
@@ -21,7 +23,11 @@ public class SplashScreenActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
 
         mPreferencesHandler = new PreferencesHandler(getApplicationContext());
+
         Detection.INSTANCE.load(getApplicationContext());
+        if (mPreferencesHandler.isSetUp()) {
+            Verification.INSTANCE.load(getApplicationContext());
+        }
 
         if (!mPreferencesHandler.isSetUp()) {
             Intent intentToStartWelcomeActivity = new Intent(getApplicationContext(),

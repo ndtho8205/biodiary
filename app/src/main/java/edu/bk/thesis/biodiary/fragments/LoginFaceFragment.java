@@ -1,136 +1,55 @@
 package edu.bk.thesis.biodiary.fragments;
 
 import android.Manifest;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
+import org.bytedeco.javacpp.opencv_core.Mat;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import edu.bk.thesis.biodiary.R;
-import edu.bk.thesis.biodiary.activities.LoginActivity;
 import edu.bk.thesis.biodiary.core.face.CvCameraPreview;
+import edu.bk.thesis.biodiary.core.face.Detection;
+import edu.bk.thesis.biodiary.core.face.Face;
+import edu.bk.thesis.biodiary.core.face.JavaCvUtils;
+import edu.bk.thesis.biodiary.core.face.Preprocessing;
+import edu.bk.thesis.biodiary.core.face.Verification;
 import edu.bk.thesis.biodiary.handlers.PreferencesHandler;
+import edu.bk.thesis.biodiary.utils.MessageHelper;
+import edu.bk.thesis.biodiary.utils.PermissionHelper;
+
+import static org.bytedeco.javacpp.opencv_imgproc.COLOR_BGR2GRAY;
+import static org.bytedeco.javacpp.opencv_imgproc.cvtColor;
 
 
-public class LoginFaceFragment extends Fragment
+public class LoginFaceFragment extends Fragment implements CvCameraPreview.CvCameraViewListener
 {
 
-    private static final String TAG                      = LoginFaceFragment.class.getSimpleName();
-    private static final int    PERMISSIONS_REQUEST_CODE = 0;
-    private static final int    MAXIMUM_IMAGES           = 100;
+    private static final String TAG = LoginFaceFragment.class.getSimpleName();
 
-    private Button          mDoneButton;
-    private ImageButton     mTakePictureButton;
-    private CvCameraPreview mCameraView;
+    @BindView (R.id.login_face_camera_view)
+    CvCameraPreview mCameraView;
 
-    private Toast              mToast;
-    private PreferencesHandler mPreferencesHandler;
+    private Face mFaceInFrame;
 
-//     private TrainFacesTask mTrainFacesTask;
-//     private TrainFacesTask.Callback mTrainFacesTaskCallback = new TrainFacesTask.Callback()
-//     {
-//         @Override
-//         public void onTrainFacesComplete(boolean result)
-//         {
-//             if (result) {
-//                 showToast("Training complete", Toast.LENGTH_SHORT);
-//             }
-//             else {
-//                 showToast("Training failed", Toast.LENGTH_LONG);
-//             }
-//         }
-//     };
-//
-//     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(getContext())
-//     {
-//         @Override
-//         public void onManagerConnected(int status)
-//         {
-//             switch (status) {
-//                 case LoaderCallbackInterface.SUCCESS:
-//                     NativeMethods.loadNativeLibraries();
-//                     Log.i(TAG, "OpenCV loaded successfully");
-//                     mCameraView.enableView();
-//
-//                     mUserImages
-//                             = mPreferencesHandler.getListMat(PreferencesHandler.KEY_USER_IMAGES);
-//                     Log.i(TAG, "Number of user images loaded: " + mUserImages.size());
-//                     if (!mUserImages.isEmpty()) {
-//                         trainFaces();
-//                         Log.i(TAG,
-//                               "Loaded User Images height: " + mUserImages.get(0).height() +
-//                               " Width: " +
-//                               mUserImages.get(0).width() + " total: " + mUserImages.get(0).total());
-//                     }
-//
-//                     break;
-//                 default:
-//                     super.onManagerConnected(status);
-//                     break;
-//             }
-//         }
-//     };
-//
-//     private MeasureDistTask mMeasureDistTask;
-//     private MeasureDistTask.Callback measureDistTaskCallback = new MeasureDistTask.Callback()
-//     {
-//         @Override
-//         public void onMeasureDistComplete(Bundle bundle)
-//         {
-//             if (bundle == null) {
-//                 showToast("Failed to compute distance", Toast.LENGTH_LONG);
-//                 return;
-//             }
-//
-//             float minDist = bundle.getFloat(MeasureDistTask.MIN_DIST_FLOAT);
-//             if (minDist != -1) {
-//                 int   minIndex = bundle.getInt(MeasureDistTask.MIN_DIST_INDEX_INT);
-//                 float faceDist = bundle.getFloat(MeasureDistTask.DIST_FACE_FLOAT);
-//                 //if (imagesLabels.size() > minIndex) {
-//                 String minDistString  = String.format(Locale.US, "%.4f", minDist);
-//                 String faceDistString = String.format(Locale.US, "%.4f", faceDist);
-//
-//                 //result = (float) (0.4 * faceDist  + 0.6 * minDist);
-// //                if (minDist < distanceThreshold) {
-// //                    showToast("Successful recognization. Hello " + imagesLabels.get(minIndex) +
-// //                              ". Face distance: " + faceDistString + ". Closest Distance: " +
-// //                              minDistString, Toast.LENGTH_LONG);
-// //                }
-// //                else {
-// //                    showToast("Failed recognization. Face distance: " + faceDistString +
-// //                              ". Closest Distance: " + minDistString, Toast.LENGTH_LONG);
-// //                }
-//                 //}
-//                 showToast("minDist: " + minDistString + "faceDist: " + faceDistString,
-//                           Toast.LENGTH_LONG);
-//             }
-//         }
-//     };
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String permissions[],
-                                           @NonNull int[] grantResults)
+    private Verification.PredictTask.Callback mPredictFaceTaskCallback
+        = new Verification.PredictTask.Callback()
     {
-        if (requestCode == PERMISSIONS_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // loadOpenCV();
-            }
-            else {
-                showToast("Permission required!", Toast.LENGTH_LONG);
-                getActivity().finish();
-            }
+        @Override
+        public void onPredictComplete(double distance)
+        {
+            MessageHelper.showToast(getActivity(), "Distance: " + distance, Toast.LENGTH_LONG);
         }
-    }
+    };
+    private PreferencesHandler mPreferencesHandler;
 
     @Nullable
     @Override
@@ -140,50 +59,11 @@ public class LoginFaceFragment extends Fragment
     {
 
         View view = inflater.inflate(R.layout.fragment_login_face, container, false);
+        ButterKnife.bind(this, view);
 
-        mDoneButton = view.findViewById(R.id.login_face_btn_done);
+        PermissionHelper.requestPermissions(getActivity(), 2, Manifest.permission.CAMERA);
 
-        mDoneButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                ((LoginActivity) getActivity()).setCurrentStep(LoginActivity.LOGIN_VOICE_STEP);
-            }
-        });
-
-        mTakePictureButton = view.findViewById(R.id.login_face_btn_take_picture);
-        mTakePictureButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                // Log.i(TAG, "Take picture and start measure");
-                //
-                // Log.i(TAG, "Gray height: " + mGray.height() + " Width: " + mGray.width() +
-                //            " total: " + mGray.total());
-                // if (mGray.total() == 0) {
-                //     return;
-                // }
-                // Size imageSize = new Size(200, 200.0f / ((float) mGray.width() /
-                //                                          (float) mGray.height()));
-                // Imgproc.resize(mGray, mGray, imageSize);
-                // Log.i(TAG, "Small gray height: " + mGray.height() + " Width: " + mGray.width() +
-                //            " total: " + mGray.total());
-                //
-                // Mat image = mGray.reshape(0, (int) mGray.total()); // Create column vector
-                // Log.i(TAG, "Vector height: " + image.height() + " Width: " + image.width() +
-                //            " total: " + image.total());
-                //
-                // mMeasureDistTask = new MeasureDistTask(true, measureDistTaskCallback);
-                // mMeasureDistTask.execute(image);
-            }
-        });
-
-        // mCameraView = view.findViewById(R.id.login_face_camera_view);
-        // mCameraView.setCameraIndex(CameraBridgeViewBase.CAMERA_ID_FRONT);
-        // mCameraView.setVisibility(SurfaceView.VISIBLE);
-        // mCameraView.setCvCameraViewListener(this);
+        mCameraView.setCvCameraViewListener(this);
 
         mPreferencesHandler = new PreferencesHandler(getActivity().getApplicationContext());
 
@@ -191,173 +71,42 @@ public class LoginFaceFragment extends Fragment
     }
 
     @Override
-    public void onResume()
+    public void onCameraViewStarted(int width, int height)
     {
-        super.onResume();
 
-        // Request permission if needed
-        if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(),
-                                              Manifest.permission.CAMERA) !=
-            PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(),
-                                              new String[]{ Manifest.permission.CAMERA },
-                                              PERMISSIONS_REQUEST_CODE);
-        }
-        // else {
-        //     loadOpenCV();
-        // }
     }
 
     @Override
-    public void onPause()
+    public void onCameraViewStopped()
     {
-        super.onPause();
 
-        // if (mCameraView != null) {
-        //     mCameraView.disableView();
-        // }
     }
 
     @Override
-    public void onStop()
+    public Mat onCameraFrame(Mat image)
     {
-        super.onStop();
+        Mat grayImage = new Mat();
 
-        // Store ArrayLists containing the images and labels
-        // if (mUserImages != null) {
-        //     mPreferencesHandler.putListMat(PreferencesHandler.KEY_USER_IMAGES, mUserImages);
-        //     Log.i(TAG, "Saved user images");
-        // }
-    }
+        cvtColor(image, grayImage, COLOR_BGR2GRAY);
 
-    @Override
-    public void onDestroy()
-    {
-        super.onDestroy();
-
-        // if (mCameraView != null) {
-        //     mCameraView.disableView();
-        // }
-    }
-
-    // public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame)
-    // {
-    // Mat mGrayTmp = inputFrame.gray();
-    // Mat mRgbaTmp = inputFrame.rgba();
-    //
-    // // Flip image to get mirror effect
-    // int orientation = mCameraView.getScreenOrientation();
-    // if (mCameraView.isEmulator()) // Treat emulators as a special case
-    // {
-    //     Core.flip(mRgbaTmp, mRgbaTmp, 1); // Flip along y-axis
-    // }
-    // else {
-    //     switch (orientation) { // RGB image
-    //         case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
-    //         case ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT:
-    //             if (mCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_FRONT) {
-    //                 Core.flip(mRgbaTmp, mRgbaTmp, 0); // Flip along x-axis
-    //             }
-    //             else {
-    //                 Core.flip(mRgbaTmp, mRgbaTmp, -1); // Flip along both axis
-    //             }
-    //             break;
-    //         case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
-    //         case ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE:
-    //             if (mCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_FRONT) {
-    //                 Core.flip(mRgbaTmp, mRgbaTmp, 1); // Flip along y-axis
-    //             }
-    //             break;
-    //     }
-    //     switch (orientation) { // Grayscale image
-    //         case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
-    //             Core.transpose(mGrayTmp, mGrayTmp); // Rotate image
-    //             if (mCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_FRONT) {
-    //                 Core.flip(mGrayTmp, mGrayTmp, -1); // Flip along both axis
-    //             }
-    //             else {
-    //                 Core.flip(mGrayTmp, mGrayTmp, 1); // Flip along y-axis
-    //             }
-    //             break;
-    //         case ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT:
-    //             Core.transpose(mGrayTmp, mGrayTmp); // Rotate image
-    //             if (mCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_BACK) {
-    //                 Core.flip(mGrayTmp, mGrayTmp, 0); // Flip along x-axis
-    //             }
-    //             break;
-    //         case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
-    //             if (mCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_FRONT) {
-    //                 Core.flip(mGrayTmp, mGrayTmp, 1); // Flip along y-axis
-    //             }
-    //             break;
-    //         case ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE:
-    //             Core.flip(mGrayTmp, mGrayTmp, 0); // Flip along x-axis
-    //             if (mCameraView.mCameraIndex == CameraBridgeViewBase.CAMERA_ID_BACK) {
-    //                 Core.flip(mGrayTmp, mGrayTmp, 1); // Flip along y-axis
-    //             }
-    //             break;
-    //     }
-    // }
-    //
-    // mGray = mGrayTmp;
-    // mRgba = mRgbaTmp;
-    //
-    // return mRgba;
-    // }
-
-    private void showToast(String message, int duration)
-    {
-        if (duration != Toast.LENGTH_SHORT && duration != Toast.LENGTH_LONG) {
-            throw new IllegalArgumentException();
+        Face face = Detection.INSTANCE.detect(grayImage, "new");
+        if (face != null) {
+            mFaceInFrame = face;
+            JavaCvUtils.INSTANCE.showDetectedFace(face, image);
         }
-        if (mToast != null && mToast.getView().isShown()) {
-            mToast.cancel();
-        }
-        mToast = Toast.makeText(getActivity().getApplicationContext(), message, duration);
-        mToast.show();
+        return image;
     }
 
-    // private boolean trainFaces()
-    // {
-    //   if (mUserImages.isEmpty()) {
-    //     return true;
-    //   }
-    //
-    //   if (mTrainFacesTask != null && mTrainFacesTask.getStatus() != AsyncTask.Status.FINISHED) {
-    //     Log.i(TAG, "mTrainFacesTask is still running");
-    //     return false;
-    //   }
-    //
-    //   Mat imagesMatrix = new Mat((int) mUserImages.get(0).total(),
-    //                              mUserImages.size(),
-    //                              mUserImages.get(0).type());
-    //   for (int i = 0; i < mUserImages.size(); i++) {
-    //     mUserImages.get(i)
-    //                .copyTo(imagesMatrix.col(i)); // Create matrix where each image is represented as a column vector
-    //   }
-    //   Log.i(TAG,
-    //         "Images height: " + imagesMatrix.height() + " Width: " + imagesMatrix.width() +
-    //         " total: " + imagesMatrix.total());
-    //
-    //   Log.i(TAG, "Training Eigenfaces");
-    //   mTrainFacesTask = new TrainFacesTask(imagesMatrix, mTrainFacesTaskCallback);
-    //   mTrainFacesTask.execute();
-    //
-    //   return true;
-    // }
+    @OnClick (R.id.login_face_btn_take_picture)
+    void takePicture()
+    {
+        if (mFaceInFrame != null) {
+            mCameraView.shootSound();
+            Log.i(TAG, "Take picture and start verification...");
 
-    // private void loadOpenCV()
-    // {
-    //   if (!OpenCVLoader.initDebug()) {
-    //     Log.d(TAG,
-    //           "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-    //     OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_1_0,
-    //                            getContext(),
-    //                            mLoaderCallback);
-    //   }
-    //   else {
-    //     Log.d(TAG, "OpenCV library found inside package. Using it!");
-    //     mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
-    //   }
-    // }
+            Preprocessing.INSTANCE.scaleToStandardSize(mFaceInFrame);
+
+            Verification.INSTANCE.predict(mFaceInFrame, mPredictFaceTaskCallback);
+        }
+    }
 }

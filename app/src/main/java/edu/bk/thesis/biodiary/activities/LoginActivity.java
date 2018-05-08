@@ -12,12 +12,29 @@ import edu.bk.thesis.biodiary.handlers.PreferencesHandler;
 
 public class LoginActivity extends AppCompatActivity
 {
+
     public static final int LOGIN_FACE_STEP  = 0;
     public static final int LOGIN_VOICE_STEP = 1;
 
     private ViewPager mViewPager;
 
     private PreferencesHandler mPreferencesHandler;
+
+    public void setCurrentStep(int item)
+    {
+        mViewPager.setCurrentItem(item);
+    }
+
+    public void finishLogin()
+    {
+        mPreferencesHandler.createLoginSession();
+
+        Intent intentToStartSplashScreenActivity = new Intent(getApplicationContext(),
+                                                              SplashScreenActivity.class);
+        intentToStartSplashScreenActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intentToStartSplashScreenActivity);
+        finish();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -36,21 +53,5 @@ public class LoginActivity extends AppCompatActivity
     {
         LoginAdapter adapter = new LoginAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(adapter);
-    }
-
-    public void setCurrentStep(int item)
-    {
-        mViewPager.setCurrentItem(item);
-    }
-
-    public void finishLogin()
-    {
-        mPreferencesHandler.createLoginSession();
-
-        Intent intentToStartSplashScreenActivity = new Intent(getApplicationContext(),
-                                                              SplashScreenActivity.class);
-        intentToStartSplashScreenActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intentToStartSplashScreenActivity);
-        finish();
     }
 }

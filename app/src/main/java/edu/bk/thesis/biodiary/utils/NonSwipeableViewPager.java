@@ -38,7 +38,6 @@ public class NonSwipeableViewPager extends ViewPager
         return false;
     }
 
-
     private void setMyScroller()
     {
         try {
@@ -54,6 +53,7 @@ public class NonSwipeableViewPager extends ViewPager
 
     public class MyScroller extends Scroller
     {
+
         public MyScroller(Context context)
         {
             super(context, new DecelerateInterpolator());

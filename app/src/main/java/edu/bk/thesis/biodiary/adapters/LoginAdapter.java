@@ -10,6 +10,7 @@ import edu.bk.thesis.biodiary.fragments.LoginVoiceFragment;
 
 public class LoginAdapter extends FragmentPagerAdapter
 {
+
     private static int NUM_SETUP_STEPS = 2;
 
     public LoginAdapter(FragmentManager fragmentManager)
@@ -29,7 +30,6 @@ public class LoginAdapter extends FragmentPagerAdapter
                 return null;
         }
     }
-
 
     @Override
     public int getCount()

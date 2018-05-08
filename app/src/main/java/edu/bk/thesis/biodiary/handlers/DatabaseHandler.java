@@ -14,6 +14,7 @@ import edu.bk.thesis.biodiary.models.Diary;
 
 public class DatabaseHandler extends SQLiteOpenHelper
 {
+
     private static final int    DATABASE_VERSION = 2;
     private static final String DATABASE_NAME    = "biodiaryDB.db";
 
@@ -73,8 +74,8 @@ public class DatabaseHandler extends SQLiteOpenHelper
         List<Diary.Entry> entries = new ArrayList<>();
 
         String selectQuery =
-                "SELECT * FROM " + Diary.TABLE_NAME
-                + " ORDER BY " + Diary.COLUMN_DATE + " DESC";
+            "SELECT * FROM " + Diary.TABLE_NAME
+            + " ORDER BY " + Diary.COLUMN_DATE + " DESC";
 
         SQLiteDatabase db     = getReadableDatabase();
         Cursor         cursor = db.rawQuery(selectQuery, null);
@@ -82,10 +83,10 @@ public class DatabaseHandler extends SQLiteOpenHelper
         if (cursor.moveToFirst()) {
             do {
                 Diary.Entry entry
-                        = new Diary.Entry(cursor.getLong(cursor.getColumnIndex(Diary.COLUMN_ID)),
-                                          cursor.getLong(cursor.getColumnIndex(Diary.COLUMN_TIMESTAMP)),
-                                          cursor.getString(cursor.getColumnIndex(Diary.COLUMN_CONTENT)),
-                                          cursor.getLong(cursor.getColumnIndex(Diary.COLUMN_DATE)));
+                    = new Diary.Entry(cursor.getLong(cursor.getColumnIndex(Diary.COLUMN_ID)),
+                                      cursor.getLong(cursor.getColumnIndex(Diary.COLUMN_TIMESTAMP)),
+                                      cursor.getString(cursor.getColumnIndex(Diary.COLUMN_CONTENT)),
+                                      cursor.getLong(cursor.getColumnIndex(Diary.COLUMN_DATE)));
                 entries.add(entry);
             } while (cursor.moveToNext());
         }

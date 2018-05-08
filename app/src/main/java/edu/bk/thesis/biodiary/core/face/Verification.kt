@@ -1,5 +1,8 @@
 package edu.bk.thesis.biodiary.core.face
 
+import android.content.Context
+import android.os.AsyncTask
+import android.util.Log
 import org.bytedeco.javacpp.DoublePointer
 import org.bytedeco.javacpp.IntPointer
 import org.bytedeco.javacpp.opencv_core.CV_32SC1
@@ -8,55 +11,112 @@ import org.bytedeco.javacpp.opencv_face.FaceRecognizer
 import org.bytedeco.javacpp.opencv_face.createEigenFaceRecognizer
 import java.nio.IntBuffer
 
+object Verification
+{
 
-object Verification {
+    const val TAG = "Verification"
+
     const val FACE_IMAGE_QUANTITY = 25
+    const val MODEL_FILENAME = "model.yml"
 
     private val mRecognizer: FaceRecognizer = createEigenFaceRecognizer(128, 10000.0)
 
-    fun load(trainedResult: String) {
-//        mRecognizer.read(trainedResult)
+    fun load(context: Context)
+    {
+        val modelPath = context.getFileStreamPath(MODEL_FILENAME).absolutePath
+        mRecognizer.load(modelPath)
     }
 
-    fun save(path: String) {
-//        mRecognizer.save(path)
+    fun save(context: Context)
+    {
+        val modelPath = context.getFileStreamPath(MODEL_FILENAME).absolutePath
+        mRecognizer.save(modelPath)
     }
 
-
-    fun train(faces: List<Face>) {
+    fun train(faces: List<Face>): Boolean
+    {
         val labels = generateLabels(faces)
         val faceImageList = faces.map { it.alignedImage; }
+        if (faceImageList.isEmpty())
+            return false
         mRecognizer.train(JavaCvUtils.list2MatVector(faceImageList), labels)
+        return true
     }
 
-    private fun generateLabels(faces: List<Face>): Mat {
+    private fun generateLabels(faces: List<Face>): Mat
+    {
         val labels = Mat(faces.size, 1, CV_32SC1)
         val label = 100
         val labelsBuf: IntBuffer = labels.createBuffer()
 
-        for ((counter, _) in faces.withIndex()) {
+        for ((counter, _) in faces.withIndex())
+        {
             labelsBuf.put(counter, label)
         }
 
         return labels
     }
 
-    fun predict(testFace: Face) {
+    fun predict(testFace: Face, callback: PredictTask.Callback?)
+    {
+        Log.d(TAG, "Start predicting a face...")
         val label = IntPointer(1)
         val confidence = DoublePointer(1)
-        mRecognizer.predict(testFace.image, label, confidence)
+        mRecognizer.predict(testFace.alignedImage, label, confidence)
 
         val predictedLabel = label.get(0)
         val predictedConfidence = confidence.get(0)
-        println("Face: ${testFace.containerImageName}")
-        println("Predicted label: $predictedLabel")
-        println("Confidence: $predictedConfidence")
+        Log.d(TAG, "Face: ${testFace.containerImageName}")
+        Log.d(TAG, "Predicted label: $predictedLabel")
+        Log.d(TAG, "Confidence: $predictedConfidence")
+        callback?.onPredictComplete(predictedConfidence)
     }
 
-    fun predict(testFaces: List<Face>) {
+    fun predict(testFaces: List<Face>, callback: PredictTask.Callback? = null)
+    {
         testFaces.forEach {
-            predict(it)
-            println()
+            predict(it, callback)
+        }
+    }
+
+    object PredictTask
+    {
+
+        interface Callback
+        {
+
+            fun onPredictComplete(confidence: Double)
+        }
+    }
+
+    class TrainTask(private val faces: List<Face>, private val callback: Callback?) :
+            AsyncTask<Void, Void, Boolean>()
+    {
+
+        interface Callback
+        {
+
+            fun onTrainComplete(result: Boolean)
+        }
+
+        override fun doInBackground(vararg params: Void?): Boolean
+        {
+            Log.d(Verification.TAG, "Start training...")
+            Log.d(Verification.TAG, "Number of training faces: " + faces.size)
+            return try
+            {
+                return Verification.train(faces)
+            } catch (e: Exception)
+            {
+                print(e)
+                false
+            }
+        }
+
+        override fun onPostExecute(result: Boolean?)
+        {
+            Log.d(Verification.TAG, "Training completed!")
+            callback?.onTrainComplete(result ?: false)
         }
     }
 }

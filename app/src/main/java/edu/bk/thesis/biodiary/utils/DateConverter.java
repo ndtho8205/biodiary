@@ -8,6 +8,7 @@ import java.util.Locale;
 
 public final class DateConverter
 {
+
     public static final String PATTERN_SHORT_DATE = "dd/MM/yyyy";
     public static final String PATTERN_LONG_DATE  = "MMM dd, yyyy";
 

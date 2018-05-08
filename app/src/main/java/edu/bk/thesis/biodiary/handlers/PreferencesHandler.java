@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 
 public class PreferencesHandler
 {
+
     public static final String KEY_USER_IMAGES             = "userImages";
     public static final String KEY_IS_SETUP                = "isSetUp";
     public static final String KEY_IS_LOGIN                = "isLoggedIn";
