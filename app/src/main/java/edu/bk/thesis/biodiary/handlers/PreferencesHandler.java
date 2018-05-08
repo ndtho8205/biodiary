@@ -2,14 +2,6 @@ package edu.bk.thesis.biodiary.handlers;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.text.TextUtils;
-import android.util.Base64;
-
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 
 public class PreferencesHandler
@@ -94,45 +86,5 @@ public class PreferencesHandler
     public float getFaceDistanceThreshold()
     {
         return mPref.getFloat(KEY_FACE_DISTANCE_THRESHOLD, -1.0f);
-    }
-
-    public ArrayList<String> getListString(String key)
-    {
-        return new ArrayList<String>(Arrays.asList(TextUtils.split(mPref.getString(key, ""),
-                                                                   "‚‗‚")));
-    }
-
-    public ArrayList<Mat> getListMat(String key)
-    {
-        ArrayList<String> objStrings = getListString(key);
-        ArrayList<Mat>    objects    = new ArrayList<Mat>();
-
-        for (String jObjString : objStrings) {
-            byte[] data = Base64.decode(jObjString, Base64.DEFAULT);
-            Mat    mat  = new Mat(data.length, 1, CvType.CV_8U);
-            mat.put(0, 0, data);
-            objects.add(mat);
-        }
-        return objects;
-    }
-
-    public void putListString(String key, ArrayList<String> stringList)
-    {
-        String[] myStringList = stringList.toArray(new String[stringList.size()]);
-        mPref.edit().putString(key, TextUtils.join("‚‗‚", myStringList)).apply();
-    }
-
-    public void putListMat(String key, ArrayList<Mat> objArray)
-    {
-        ArrayList<String> objStrings = new ArrayList<String>();
-
-        for (Mat mat : objArray) {
-            int    size = (int) (mat.total() * mat.channels());
-            byte[] data = new byte[size];
-            mat.get(0, 0, data);
-            String dataString = new String(Base64.encode(data, Base64.DEFAULT));
-            objStrings.add(dataString);
-        }
-        putListString(key, objStrings);
     }
 }

@@ -1,6 +1,0 @@
-*.o
-eigenfaces/
-fisherfaces/
-matches_eigenfaces/
-matches_fisherfaces/
-main

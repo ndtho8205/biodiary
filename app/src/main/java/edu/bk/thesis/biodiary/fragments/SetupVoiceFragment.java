@@ -25,22 +25,22 @@ public class SetupVoiceFragment extends Fragment
     {
         View view = inflater.inflate(R.layout.fragment_setup_voice, container, false);
 
-        mSoundFeature = new SoundFeature();
-
-        mRecordButton = view.findViewById(R.id.setup_voice_btn_record);
-        mRecordButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                try {
-                    mSoundFeature.getOwner();
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        // mSoundFeature = new SoundFeature();
+        //
+        // mRecordButton = view.findViewById(R.id.setup_voice_btn_record);
+        // mRecordButton.setOnClickListener(new View.OnClickListener()
+        // {
+        //     @Override
+        //     public void onClick(View v)
+        //     {
+        //         try {
+        //             mSoundFeature.getOwner();
+        //         }
+        //         catch (Exception e) {
+        //             e.printStackTrace();
+        //         }
+        //     }
+        // });
 
         return view;
     }

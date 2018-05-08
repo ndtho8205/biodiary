@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import edu.bk.thesis.biodiary.handlers.PreferencesHandler;
+import face.Detection;
 
 
 public class SplashScreenActivity extends AppCompatActivity
@@ -20,6 +21,7 @@ public class SplashScreenActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
 
         mPreferencesHandler = new PreferencesHandler(getApplicationContext());
+        Detection.INSTANCE.load(getApplicationContext());
 
         if (!mPreferencesHandler.isSetUp()) {
             Intent intentToStartWelcomeActivity = new Intent(getApplicationContext(),

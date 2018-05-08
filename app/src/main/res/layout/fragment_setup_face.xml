@@ -5,13 +5,12 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <edu.bk.thesis.biodiary.core.face.JavaCameraView
+    <edu.bk.thesis.biodiary.core.face.CvCameraPreview
         android:id="@+id/setup_face_camera_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="40dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp" />
+        app:camera_type="front"
+        app:scale_type="full" />
 
     <ImageButton
         android:id="@+id/setup_face_btn_take_picture"
