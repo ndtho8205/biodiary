@@ -9,7 +9,8 @@ import org.bytedeco.javacpp.opencv_face.createEigenFaceRecognizer
 import java.nio.IntBuffer
 
 
-class Verification {
+object Verification {
+    const val FACE_IMAGE_QUANTITY = 25
 
     private val mRecognizer: FaceRecognizer = createEigenFaceRecognizer(128, 10000.0)
 
@@ -24,7 +25,7 @@ class Verification {
 
     fun train(faces: List<Face>) {
         val labels = generateLabels(faces)
-        val faceImageList = faces.map { it.image }
+        val faceImageList = faces.map { it.alignedImage; }
         mRecognizer.train(JavaCvUtils.list2MatVector(faceImageList), labels)
     }
 

@@ -1,13 +1,14 @@
-package face
+package edu.bk.thesis.biodiary.core.face
 
 import android.content.Context
 import edu.bk.thesis.biodiary.R
-import edu.bk.thesis.biodiary.core.face.Face
 import org.bytedeco.javacpp.opencv_core.*
 import org.bytedeco.javacpp.opencv_objdetect.CascadeClassifier
 
 
 object Detection {
+    private const val MIN_FACE_WIDTH_THRESHOLD = 200
+
     private var mFaceCascade: CascadeClassifier? = null
 
     fun load(context: Context) {
@@ -21,7 +22,6 @@ object Detection {
         mFaceCascade = CascadeClassifier(context.getFileStreamPath("cascade.xml").absolutePath)
     }
 
-    private val MIN_FACE_WIDTH_THRESHOLD = 200
 
     private fun findBoundingBox(imgGray: Mat): Face.BoundingBox? {
         val facesRect = RectVector()

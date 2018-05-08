@@ -31,6 +31,9 @@ import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.Size;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -130,6 +133,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
     private int cameraType = Camera.CameraInfo.CAMERA_FACING_BACK;
     private Camera         cameraDevice;
     private SurfaceTexture surfaceTexture;
+    private MediaPlayer    mMediaPlayer;
     private int            frameWidth, frameHeight;
     private int scaleType = SCALE_FIT;
 
@@ -308,6 +312,25 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
         }
 
         return orientation;
+    }
+
+    public void shootSound()
+    {
+
+        AudioManager meng
+                = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
+        int volume = meng.getStreamVolume(AudioManager.STREAM_NOTIFICATION);
+
+        if (volume != 0) {
+            if (mMediaPlayer == null) {
+                mMediaPlayer = MediaPlayer.create(getContext(),
+                                                  Uri.parse(
+                                                          "file:///system/media/audio/ui/camera_click.ogg"));
+            }
+            else if (mMediaPlayer != null) {
+                mMediaPlayer.start();
+            }
+        }
     }
 
     /**

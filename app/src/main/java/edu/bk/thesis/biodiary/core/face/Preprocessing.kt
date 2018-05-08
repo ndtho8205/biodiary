@@ -1,4 +1,4 @@
-package face
+package edu.bk.thesis.biodiary.core.face
 
 import org.bytedeco.javacpp.opencv_core
 import org.bytedeco.javacpp.opencv_core.Mat
@@ -12,6 +12,10 @@ object Preprocessing {
         return dest
     }
 
+    fun scaleToStandardSize(face: Face) {
+        face.alignedImage = scaleToStandardSize(face.image)
+    }
+
     fun equalizeHist(image: Mat): Mat {
         val clipLimit = 2.0
         val tileGridSize = opencv_core.Size(8, 8)
@@ -22,9 +26,17 @@ object Preprocessing {
         return result
     }
 
+    fun equalizeHist(face: Face) {
+        face.alignedImage = equalizeHist(face.image)
+    }
+
     fun changeBrightness(image: Mat, beta: Double): Mat {
         val result = Mat()
         image.convertTo(result, -1, 1.0, beta)
         return result
+    }
+
+    fun changeBrightness(face: Face, beta: Double) {
+        face.alignedImage = changeBrightness(face.image, beta)
     }
 }

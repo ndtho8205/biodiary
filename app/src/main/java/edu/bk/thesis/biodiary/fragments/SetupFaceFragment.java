@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_core.Mat;
@@ -21,10 +22,11 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import edu.bk.thesis.biodiary.R;
 import edu.bk.thesis.biodiary.core.face.CvCameraPreview;
+import edu.bk.thesis.biodiary.core.face.Detection;
 import edu.bk.thesis.biodiary.core.face.Face;
-import edu.bk.thesis.biodiary.handlers.PreferencesHandler;
+import edu.bk.thesis.biodiary.core.face.Preprocessing;
+import edu.bk.thesis.biodiary.core.face.Verification;
 import edu.bk.thesis.biodiary.utils.PermissionHelper;
-import face.Detection;
 
 import static org.bytedeco.javacpp.opencv_core.LINE_8;
 import static org.bytedeco.javacpp.opencv_core.flip;
@@ -36,16 +38,15 @@ import static org.bytedeco.javacpp.opencv_imgproc.rectangle;
 public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCameraViewListener
 {
 
-    private static final String TAG                      = SetupFaceFragment.class.getSimpleName();
-    private static final int    PERMISSIONS_REQUEST_CODE = 0;
-    private static final int    MAXIMUM_IMAGES           = 100;
+    private static final String TAG = SetupFaceFragment.class.getSimpleName();
 
     @BindView (R.id.setup_face_camera_view)
     CvCameraPreview mCameraView;
+    @BindView (R.id.setup_face_pb_pictures_quantity)
+    ProgressBar     mPictureQuantityProgressBar;
 
-    private PreferencesHandler mPreferencesHandler;
-
-    private List<Face> mFaceImages = new ArrayList<>();
+    private Face mFaceInFrame;
+    private List<Face> mFaceList = new ArrayList<>();
 
 //     private TrainFacesTask mTrainFacesTask;
 //     private TrainFacesTask.Callback mTrainFacesTaskCallback = new TrainFacesTask.Callback()
@@ -102,9 +103,10 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
 
         PermissionHelper.requestPermissions(getActivity(), 1, Manifest.permission.CAMERA);
 
-        mPreferencesHandler = new PreferencesHandler(getActivity().getApplicationContext());
-
         mCameraView.setCvCameraViewListener(this);
+
+        mPictureQuantityProgressBar.setProgress(0);
+        mPictureQuantityProgressBar.setMax(Verification.FACE_IMAGE_QUANTITY);
 
         return view;
     }
@@ -132,14 +134,11 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
         {
             flip(image, image, 1);
         }
-
         cvtColor(image, grayImage, COLOR_BGR2GRAY);
 
-        Face face = Detection.INSTANCE.detect(grayImage, String.valueOf(mFaceImages.size()));
+        Face face = Detection.INSTANCE.detect(grayImage, String.valueOf(mFaceList.size()));
         if (face != null) {
-            face.save(this.getContext()
-                          .getFileStreamPath(face.getContainerImageName() + ".jpg")
-                          .getAbsolutePath());
+            mFaceInFrame = face;
             showDetectedFace(face, image);
         }
 
@@ -191,42 +190,21 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
         return true;
     }
 
-    @OnClick (R.id.setup_face_btn_take_picture)
-    void takePictureAndSave()
+    @OnClick (R.id.setup_face_pb_pictures_quantity)
+    void takePicture()
     {
-        Log.i(TAG, "Take picture and save for training later.");
-        // Log.i(TAG, "Take picture and start training");
-        //
-        // if (mTrainFacesTask != null &&
-        //     mTrainFacesTask.getStatus() != AsyncTask.Status.FINISHED) {
-        //     Log.i(TAG, "mTrainFacesTask is still running");
-        //     showToast("Still training...", Toast.LENGTH_SHORT);
-        //     return;
-        // }
-        //
-        // Log.i(TAG, "Gray height: " + mGray.height() + " Width: " + mGray.width() +
-        //            " total: " + mGray.total());
-        // if (mGray.total() == 0) {
-        //     return;
-        // }
-        // Size imageSize = new Size(200, 200.0f / ((float) mGray.width() /
-        //                                          (float) mGray.height()));
-        // Imgproc.resize(mGray, mGray, imageSize);
-        // Log.i(TAG, "Small gray height: " + mGray.height() + " Width: " + mGray.width() +
-        //            " total: " + mGray.total());
-        //
-        // Mat image = mGray.reshape(0, (int) mGray.total()); // Create column vector
-        // Log.i(TAG, "Vector height: " + image.height() + " Width: " + image.width() +
-        //            " total: " + image.total());
-        // mUserImages.add(image); // Add current image to the array
-        //
-        // if (mUserImages.size() > MAXIMUM_IMAGES) {
-        //     mUserImages.remove(0);
-        //     Log.i(TAG, "The number of images is limited to: " + mUserImages.size());
-        // }
-        //
-        // showToast("Image captured: " + mUserImages.size(), Toast.LENGTH_LONG);
+        mCameraView.shootSound();
 
-        //trainFaces();
+        if (mFaceInFrame != null) {
+            Log.i(TAG, "Take picture for training later." + mFaceList.size());
+
+            Preprocessing.INSTANCE.scaleToStandardSize(mFaceInFrame);
+
+            mFaceList.add(mFaceInFrame);
+            mPictureQuantityProgressBar.setProgress(mFaceList.size());
+            if (mFaceList.size() == Verification.FACE_IMAGE_QUANTITY) {
+                trainFaces();
+            }
+        }
     }
 }

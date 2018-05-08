@@ -12,20 +12,19 @@
         app:camera_type="front"
         app:scale_type="full" />
 
-    <ImageButton
-        android:id="@+id/setup_face_btn_take_picture"
-        style="?attr/actionButtonStyle"
-        android:layout_width="128dp"
-        android:layout_height="64dp"
-        android:layout_gravity="center_horizontal"
+    <ProgressBar
+        android:id="@+id/setup_face_pb_pictures_quantity"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/roundcorner"
-        android:contentDescription="take_picture"
-        android:foreground="?attr/selectableItemBackground"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_camera"
-        android:tint="@android:color/white"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/ic_camera"
+        android:max="25"
+        android:progress="5"
+        android:progressDrawable="@drawable/circle_progressbar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
 </android.support.constraint.ConstraintLayout>

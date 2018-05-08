@@ -4,8 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import edu.bk.thesis.biodiary.core.face.Detection;
 import edu.bk.thesis.biodiary.handlers.PreferencesHandler;
-import face.Detection;
 
 
 public class SplashScreenActivity extends AppCompatActivity
