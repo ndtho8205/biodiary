@@ -7,7 +7,6 @@ import org.bytedeco.javacpp.DoublePointer
 import org.bytedeco.javacpp.IntPointer
 import org.bytedeco.javacpp.opencv_core.CV_32SC1
 import org.bytedeco.javacpp.opencv_core.Mat
-import org.bytedeco.javacpp.opencv_face.FaceRecognizer
 import org.bytedeco.javacpp.opencv_face.createEigenFaceRecognizer
 import java.nio.IntBuffer
 
@@ -19,7 +18,7 @@ object Verification
     const val FACE_IMAGE_QUANTITY = 25
     const val MODEL_FILENAME = "model.yml"
 
-    private val mRecognizer: FaceRecognizer = createEigenFaceRecognizer(128, 10000.0)
+    private val mRecognizer = createEigenFaceRecognizer(128, 10000.0)
 
     fun load(context: Context)
     {

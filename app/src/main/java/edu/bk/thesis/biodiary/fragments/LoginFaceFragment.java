@@ -102,7 +102,7 @@ public class LoginFaceFragment extends Fragment implements CvCameraPreview.CvCam
     {
         if (mFaceInFrame != null) {
             mCameraView.shootSound();
-            Log.i(TAG, "Take picture and start verification...");
+            Log.d(TAG, "Take picture and start verification...");
 
             Preprocessing.INSTANCE.scaleToStandardSize(mFaceInFrame);
 
