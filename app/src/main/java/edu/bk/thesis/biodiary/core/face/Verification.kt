@@ -1,5 +1,6 @@
 package edu.bk.thesis.biodiary.core.face
 
+import android.app.ProgressDialog
 import android.content.Context
 import android.os.AsyncTask
 import android.util.Log
@@ -88,14 +89,23 @@ object Verification
         }
     }
 
-    class TrainTask(private val faces: List<Face>, private val callback: Callback?) :
+    class TrainTask(private val context: Context, private val faces: List<Face>,
+                    private val callback: Callback?) :
             AsyncTask<Void, Void, Boolean>()
     {
+        private val mDialog = ProgressDialog(context)
 
         interface Callback
         {
 
             fun onTrainComplete(result: Boolean)
+        }
+
+        override fun onPreExecute()
+        {
+            mDialog.setMessage("Training...")
+            mDialog.show()
+            super.onPreExecute()
         }
 
         override fun doInBackground(vararg params: Void?): Boolean
@@ -107,7 +117,7 @@ object Verification
                 return Verification.train(faces)
             } catch (e: Exception)
             {
-                print(e)
+                Log.e(TAG, e.message, e)
                 false
             }
         }
@@ -116,6 +126,10 @@ object Verification
         {
             Log.d(Verification.TAG, "Training completed!")
             callback?.onTrainComplete(result ?: false)
+            if (mDialog.isShowing)
+            {
+                mDialog.dismiss()
+            }
         }
     }
 }

@@ -30,7 +30,6 @@ import edu.bk.thesis.biodiary.core.face.Verification;
 import edu.bk.thesis.biodiary.utils.MessageHelper;
 import edu.bk.thesis.biodiary.utils.PermissionHelper;
 
-import static org.bytedeco.javacpp.opencv_core.flip;
 import static org.bytedeco.javacpp.opencv_imgproc.COLOR_BGR2GRAY;
 import static org.bytedeco.javacpp.opencv_imgproc.cvtColor;
 
@@ -65,7 +64,10 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
                 MessageHelper.showToast(getActivity(), "Training complete", Toast.LENGTH_SHORT);
             }
             else {
-                MessageHelper.showToast(getActivity(), "Training failed", Toast.LENGTH_LONG);
+                MessageHelper.showToast(getActivity(),
+                                        "Training failed. Take picture again.",
+                                        Toast.LENGTH_LONG);
+                mFaceList.clear();
             }
         }
     };
@@ -109,17 +111,11 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
     {
         Mat grayImage = new Mat();
 
-        // Flip image to get mirror effect
-        if (mCameraView.isEmulator()) // Treat emulators as a special case
-        {
-            flip(image, image, 1);
-        }
         cvtColor(image, grayImage, COLOR_BGR2GRAY);
 
-        Face face = Detection.INSTANCE.detect(grayImage, String.valueOf(mFaceList.size()));
-        if (face != null) {
-            mFaceInFrame = face;
-            JavaCvUtils.INSTANCE.showDetectedFace(face, image);
+        mFaceInFrame = Detection.INSTANCE.detect(grayImage, String.valueOf(mFaceList.size()));
+        if (mFaceInFrame != null) {
+            JavaCvUtils.INSTANCE.showDetectedFace(mFaceInFrame, image);
         }
 
         return image;
@@ -128,17 +124,21 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
     @OnClick (R.id.setup_face_pb_pictures_quantity)
     void takePicture()
     {
-        if (mFaceInFrame != null) {
+        if (mFaceInFrame != null && mFaceList.size() <= Verification.FACE_IMAGE_QUANTITY) {
             mCameraView.shootSound();
             Log.i(TAG, "Take picture for training later." + mFaceList.size());
 
             Preprocessing.INSTANCE.scaleToStandardSize(mFaceInFrame);
+            System.out.println(mFaceInFrame.getAlignedImage().rows());
+            System.out.println(mFaceInFrame.getAlignedImage().cols());
 
             mFaceList.add(mFaceInFrame);
             mPictureQuantityProgressBar.setProgress(mFaceList.size());
             if (mFaceList.size() == Verification.FACE_IMAGE_QUANTITY) {
                 trainFaces();
             }
+
+            mFaceInFrame = null;
         }
     }
 
@@ -154,7 +154,7 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
         }
 
         Log.i(TAG, "Training Eigenfaces");
-        mTrainTask = new Verification.TrainTask(mFaceList, mTrainFacesTaskCallback);
+        mTrainTask = new Verification.TrainTask(getActivity(), mFaceList, mTrainFacesTaskCallback);
         mTrainTask.execute();
 
         return true;

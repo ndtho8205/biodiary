@@ -89,10 +89,9 @@ public class LoginFaceFragment extends Fragment implements CvCameraPreview.CvCam
 
         cvtColor(image, grayImage, COLOR_BGR2GRAY);
 
-        Face face = Detection.INSTANCE.detect(grayImage, "new");
-        if (face != null) {
-            mFaceInFrame = face;
-            JavaCvUtils.INSTANCE.showDetectedFace(face, image);
+        mFaceInFrame = Detection.INSTANCE.detect(grayImage, "login");
+        if (mFaceInFrame != null) {
+            JavaCvUtils.INSTANCE.showDetectedFace(mFaceInFrame, image);
         }
         return image;
     }
@@ -106,7 +105,10 @@ public class LoginFaceFragment extends Fragment implements CvCameraPreview.CvCam
 
             Preprocessing.INSTANCE.scaleToStandardSize(mFaceInFrame);
 
+            mFaceInFrame.save();
             Verification.INSTANCE.predict(mFaceInFrame, mPredictFaceTaskCallback);
+
+            mFaceInFrame = null;
         }
     }
 }

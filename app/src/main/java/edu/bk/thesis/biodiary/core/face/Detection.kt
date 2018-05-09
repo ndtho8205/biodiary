@@ -10,7 +10,7 @@ object Detection
 {
 
     private const val TAG = "Detection"
-    private const val MIN_FACE_WIDTH_THRESHOLD = 200
+    private const val MIN_FACE_WIDTH_THRESHOLD = 160
 
     private var mFaceCascade: CascadeClassifier? = null
 
@@ -35,11 +35,13 @@ object Detection
 
         val faceIndex = when
         {
-            facesRect.size() == 1L -> if (facesRect.get(
-                            0).width() > MIN_FACE_WIDTH_THRESHOLD) 0L else -1L
+            facesRect.size() == 1L ->
+            {
+                if (facesRect.get(
+                                0).width() >= MIN_FACE_WIDTH_THRESHOLD) 0L else -1L
+            }
             facesRect.size() > 1   ->
             {
-                Log.d(TAG, "More than one face detected.")
                 var maxFaceIndex: Long = -1
                 var maxFaceWidth = -1
                 for (i in 0 until facesRect.size())
@@ -51,11 +53,10 @@ object Detection
                     }
                 }
                 print(maxFaceWidth)
-                if (maxFaceWidth > MIN_FACE_WIDTH_THRESHOLD) maxFaceIndex else -1
+                if (maxFaceWidth >= MIN_FACE_WIDTH_THRESHOLD) maxFaceIndex else -1
             }
             else                   ->
             {
-                Log.d(TAG, "No face detected.")
                 -1
             }
         }
