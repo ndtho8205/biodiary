@@ -30,15 +30,17 @@ object Detection
     {
         val facesRect = RectVector()
 
-        mFaceCascade?.detectMultiScale(imgGray, facesRect)
+        mFaceCascade?.detectMultiScale(imgGray, facesRect, 1.25, 5, 0,
+                                       Size(MIN_FACE_WIDTH_THRESHOLD, MIN_FACE_WIDTH_THRESHOLD),
+                                       Size(4 * MIN_FACE_WIDTH_THRESHOLD,
+                                            4 * MIN_FACE_WIDTH_THRESHOLD))
         Log.d(TAG, "Number of face detected in images: " + facesRect.size())
 
         val faceIndex = when
         {
             facesRect.size() == 1L ->
             {
-                if (facesRect.get(
-                                0).width() >= MIN_FACE_WIDTH_THRESHOLD) 0L else -1L
+                if (facesRect.get(0).width() >= MIN_FACE_WIDTH_THRESHOLD) 0L else -1L
             }
             facesRect.size() > 1   ->
             {

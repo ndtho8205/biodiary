@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import edu.bk.thesis.biodiary.R;
+import edu.bk.thesis.biodiary.activities.LoginActivity;
 import edu.bk.thesis.biodiary.core.voice.SoundFeature;
 
 
@@ -30,15 +31,15 @@ public class LoginVoiceFragment extends Fragment
 
         View view = inflater.inflate(R.layout.fragment_login_voice, container, false);
 
-        // mDoneButton = view.findViewById(R.id.login_voice_btn_done);
-        // mDoneButton.setOnClickListener(new View.OnClickListener()
-        // {
-        //     @Override
-        //     public void onClick(View v)
-        //     {
-        //         ((LoginActivity) getActivity()).finishLogin();
-        //     }
-        // });
+        mDoneButton = view.findViewById(R.id.login_voice_btn_done);
+        mDoneButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                ((LoginActivity) getActivity()).finishLogin();
+            }
+        });
         //
         // textView = view.findViewById(R.id.login_voice_textview);
         //

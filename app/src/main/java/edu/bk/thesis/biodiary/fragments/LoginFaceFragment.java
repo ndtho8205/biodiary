@@ -104,6 +104,9 @@ public class LoginFaceFragment extends Fragment implements CvCameraPreview.CvCam
             Log.d(TAG, "Take picture and start verification...");
 
             Preprocessing.INSTANCE.scaleToStandardSize(mFaceInFrame);
+            Log.d(TAG,
+                  "Size: " + mFaceInFrame.getAlignedImage().rows() + " x " +
+                  mFaceInFrame.getAlignedImage().cols());
 
             mFaceInFrame.save();
             Verification.INSTANCE.predict(mFaceInFrame, mPredictFaceTaskCallback);
