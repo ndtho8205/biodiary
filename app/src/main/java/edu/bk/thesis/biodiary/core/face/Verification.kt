@@ -94,6 +94,7 @@ object Verification
                     private val callback: Callback?) :
             AsyncTask<Void, Void, Boolean>()
     {
+
         private val mDialog = ProgressDialog(context)
 
         interface Callback
@@ -105,6 +106,7 @@ object Verification
         override fun onPreExecute()
         {
             mDialog.setMessage("Training...")
+            mDialog.setCancelable(false)
             mDialog.show()
             super.onPreExecute()
         }

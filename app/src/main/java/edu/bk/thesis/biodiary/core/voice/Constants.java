@@ -9,6 +9,8 @@ import java.io.File;
 public final class Constants
 {
 
+    public static final int VOICE_AUDIO_QUANTITY = 5;
+
     public static final int    SAMPLERATE    = 44100;
     public static final String SD_SUBDIRNAME = "SCM";
 

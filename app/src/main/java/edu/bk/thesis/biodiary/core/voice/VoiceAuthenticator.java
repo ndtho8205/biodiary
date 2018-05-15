@@ -126,7 +126,7 @@ public class VoiceAuthenticator
         return result;
     }
 
-    public FeatureVector train(FeatureVector featureVector)
+    public FeatureVector computeFeature(FeatureVector featureVector)
     {
         Log.i(LOG_TAG, "Starting to samples from buffer");
         double[] samples = readSamplesFromBuffer();
@@ -151,7 +151,7 @@ public class VoiceAuthenticator
         return featureVector;
     }
 
-    public boolean finishTraining(FeatureVector featureVector)
+    public boolean train(FeatureVector featureVector)
     {
         if (featureVector != null) {
             Log.i(LOG_TAG, "Do Clustering");

@@ -12,6 +12,7 @@ data class Face(val image: Mat, val boundingBox: BoundingBox, val containerImage
     fun save()
     {
         val imagePath = StorageHelper.retrieveImagePath(containerImageName)
+        Log.d("Face", "Save face to $imagePath")
         if (imagePath != null)
             JavaCvUtils.imsave(imagePath, alignedImage)
         else

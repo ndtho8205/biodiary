@@ -100,13 +100,15 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
     @Override
     public Mat onCameraFrame(Mat image)
     {
-        Mat grayImage = new Mat();
+        if (!(mTrainTask != null && mTrainTask.getStatus() != AsyncTask.Status.FINISHED)) {
+            Mat grayImage = new Mat();
 
-        cvtColor(image, grayImage, COLOR_BGR2GRAY);
+            cvtColor(image, grayImage, COLOR_BGR2GRAY);
 
-        mFaceInFrame = Detection.INSTANCE.detect(grayImage, String.valueOf(mFaceList.size()));
-        if (mFaceInFrame != null) {
-            JavaCvUtils.INSTANCE.showDetectedFace(mFaceInFrame, image);
+            mFaceInFrame = Detection.INSTANCE.detect(grayImage, String.valueOf(mFaceList.size()));
+            if (mFaceInFrame != null) {
+                JavaCvUtils.INSTANCE.showDetectedFace(mFaceInFrame, image);
+            }
         }
 
         return image;
@@ -115,7 +117,7 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
     @OnClick (R.id.setup_face_pb_pictures_quantity)
     void takePicture()
     {
-        if (mFaceInFrame != null && mFaceList.size() <= Verification.FACE_IMAGE_QUANTITY) {
+        if (mFaceInFrame != null && mFaceList.size() < Verification.FACE_IMAGE_QUANTITY) {
             mCameraView.shootSound();
             Log.i(TAG, "Take picture for training later." + mFaceList.size());
 
