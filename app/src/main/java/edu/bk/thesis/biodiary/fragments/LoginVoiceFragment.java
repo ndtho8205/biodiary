@@ -11,16 +11,14 @@ import android.widget.TextView;
 
 import edu.bk.thesis.biodiary.R;
 import edu.bk.thesis.biodiary.activities.LoginActivity;
-import edu.bk.thesis.biodiary.core.voice.SoundFeature;
 
 
 public class LoginVoiceFragment extends Fragment
 {
 
     TextView textView;
-    private Button       mRecordButton;
-    private Button       mDoneButton;
-    private SoundFeature mSoundFeature;
+    private Button mRecordButton;
+    private Button mDoneButton;
 
     @Nullable
     @Override
@@ -63,7 +61,6 @@ public class LoginVoiceFragment extends Fragment
         //         }
         //     }
         // });
-
 
         return view;
     }

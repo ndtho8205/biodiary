@@ -1,0 +1,131 @@
+package edu.bk.thesis.biodiary.core.voice.wav;
+
+import android.util.Log;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+
+
+public class WaveReader
+{
+
+    private String           filePath;
+    private RandomAccessFile raf;
+    private int              channels;
+    private int              sampleRate;
+    private int              byteRate;
+    private int              frameSize;
+    private short            resolution;
+    private int              length;
+    private int              payloadLength;
+
+    private long currentPos;
+
+    public WaveReader(String filePath)
+    {
+        this.filePath = filePath;
+        init();
+    }
+
+    public int read(byte[] buffer, int offset, int count) throws IOException
+    {
+        int read = raf.read(buffer, offset, count);
+        currentPos += read;
+        raf.seek(currentPos);
+        return read;
+    }
+
+    public void reset()
+    {
+        init();
+    }
+
+    public void close() throws IOException
+    {
+        raf.close();
+    }
+
+    /**
+     * @return the channels
+     */
+    public int getChannels()
+    {
+        return channels;
+    }
+
+    /**
+     * @return the sampleRate
+     */
+    public int getSampleRate()
+    {
+        return sampleRate;
+    }
+
+    /**
+     * @return the frameSize
+     */
+    public int getFrameSize()
+    {
+        return frameSize;
+    }
+
+    /**
+     * @return the byteRate
+     */
+    public int getByteRate()
+    {
+        return byteRate;
+    }
+
+    /**
+     * @return the resolution
+     */
+    public short getResolution()
+    {
+        return resolution;
+    }
+
+    /**
+     * @return the payloadLength
+     */
+    public int getPayloadLength()
+    {
+        return payloadLength;
+    }
+
+    private void init()
+    {
+        try {
+            raf = new RandomAccessFile(filePath, "r");
+
+            // read and file length payload length fields
+            raf.seek(4);
+            length = Integer.reverseBytes(raf.readInt());
+            raf.seek(40);
+            payloadLength = Integer.reverseBytes(raf.readInt());
+            Log.d("READER", "payloadLength: " + payloadLength);
+
+            // get other metadata
+            // channel count
+            raf.seek(22);
+            channels = Short.reverseBytes(raf.readShort());
+            sampleRate = Integer.reverseBytes(raf.readInt());
+            byteRate = Integer.reverseBytes(raf.readInt());
+            frameSize = Short.reverseBytes(raf.readShort());
+            Log.d("READER", "FrameSize: " + frameSize);
+
+            resolution = Short.reverseBytes(raf.readShort());
+
+            // set at start of data part
+            currentPos = 44;
+            raf.seek(currentPos);
+        }
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}

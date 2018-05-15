@@ -1,12 +1,15 @@
 package edu.bk.thesis.biodiary.activities;
 
+import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 
 import edu.bk.thesis.biodiary.core.face.Detection;
 import edu.bk.thesis.biodiary.core.face.Verification;
 import edu.bk.thesis.biodiary.handlers.PreferencesHandler;
+import edu.bk.thesis.biodiary.utils.PermissionHelper;
 
 
 public class SplashScreenActivity extends AppCompatActivity
@@ -17,11 +20,44 @@ public class SplashScreenActivity extends AppCompatActivity
 
     PreferencesHandler mPreferencesHandler;
 
+    String[] permissions = {
+        Manifest.permission.RECORD_AUDIO,
+        Manifest.permission.CAMERA,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        Manifest.permission.READ_EXTERNAL_STORAGE
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
 
+        if (!PermissionHelper.hasPermissions(this, permissions)) {
+            PermissionHelper.requestPermissions(this, SETUP_REQUEST, permissions);
+        }
+        else {
+            init();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults)
+    {
+        if (PermissionHelper.hasPermissions(this, permissions)) {
+            init();
+        }
+    }
+
+    private void init()
+    {
         mPreferencesHandler = new PreferencesHandler(getApplicationContext());
 
         Detection.INSTANCE.load(getApplicationContext());
@@ -50,11 +86,5 @@ public class SplashScreenActivity extends AppCompatActivity
             startActivity(intent);
             finish();
         }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        super.onActivityResult(requestCode, resultCode, data);
     }
 }

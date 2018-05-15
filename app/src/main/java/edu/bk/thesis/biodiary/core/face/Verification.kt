@@ -4,6 +4,7 @@ import android.app.ProgressDialog
 import android.content.Context
 import android.os.AsyncTask
 import android.util.Log
+import edu.bk.thesis.biodiary.utils.StorageHelper
 import org.bytedeco.javacpp.DoublePointer
 import org.bytedeco.javacpp.IntPointer
 import org.bytedeco.javacpp.opencv_core.CV_32SC1
@@ -23,13 +24,13 @@ object Verification
 
     fun load(context: Context)
     {
-        val modelPath = context.getFileStreamPath(MODEL_FILENAME).absolutePath
+        val modelPath = StorageHelper.retrievePrivatePath(context, MODEL_FILENAME)
         mRecognizer.load(modelPath)
     }
 
     fun save(context: Context)
     {
-        val modelPath = context.getFileStreamPath(MODEL_FILENAME).absolutePath
+        val modelPath = StorageHelper.retrievePrivatePath(context, MODEL_FILENAME)
         mRecognizer.save(modelPath)
     }
 

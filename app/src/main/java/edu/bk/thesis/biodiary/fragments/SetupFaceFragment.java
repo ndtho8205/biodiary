@@ -1,6 +1,5 @@
 package edu.bk.thesis.biodiary.fragments;
 
-import android.Manifest;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -28,7 +27,6 @@ import edu.bk.thesis.biodiary.core.face.JavaCvUtils;
 import edu.bk.thesis.biodiary.core.face.Preprocessing;
 import edu.bk.thesis.biodiary.core.face.Verification;
 import edu.bk.thesis.biodiary.utils.MessageHelper;
-import edu.bk.thesis.biodiary.utils.PermissionHelper;
 
 import static org.bytedeco.javacpp.opencv_imgproc.COLOR_BGR2GRAY;
 import static org.bytedeco.javacpp.opencv_imgproc.cvtColor;
@@ -44,8 +42,8 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
     @BindView (R.id.setup_face_pb_pictures_quantity)
     ProgressBar     mPictureQuantityProgressBar;
 
-    private Face mFaceInFrame;
-    private List<Face> mFaceList = new ArrayList<>();
+    private Face       mFaceInFrame;
+    private List<Face> mFaceList;
 
     private Verification.TrainTask mTrainTask;
     private Verification.TrainTask.Callback mTrainFacesTaskCallback
@@ -67,7 +65,7 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
                 MessageHelper.showToast(getActivity(),
                                         "Training failed. Take picture again.",
                                         Toast.LENGTH_LONG);
-                mFaceList.clear();
+                init();
             }
         }
     };
@@ -80,16 +78,9 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
         View view = inflater.inflate(R.layout.fragment_setup_face, container, false);
         ButterKnife.bind(this, view);
 
-        PermissionHelper.requestPermissions(getActivity(),
-                                            1,
-                                            Manifest.permission.CAMERA,
-                                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                                            Manifest.permission.READ_EXTERNAL_STORAGE);
-
         mCameraView.setCvCameraViewListener(this);
 
-        mPictureQuantityProgressBar.setProgress(0);
-        mPictureQuantityProgressBar.setMax(Verification.FACE_IMAGE_QUANTITY);
+        init();
 
         return view;
     }
@@ -129,8 +120,9 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
             Log.i(TAG, "Take picture for training later." + mFaceList.size());
 
             Preprocessing.INSTANCE.scaleToStandardSize(mFaceInFrame);
-            System.out.println(mFaceInFrame.getAlignedImage().rows());
-            System.out.println(mFaceInFrame.getAlignedImage().cols());
+            Log.d(TAG,
+                  mFaceInFrame.getAlignedImage().rows() + "x" +
+                  mFaceInFrame.getAlignedImage().cols());
 
             mFaceList.add(mFaceInFrame);
             mPictureQuantityProgressBar.setProgress(mFaceList.size());
@@ -140,6 +132,14 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
 
             mFaceInFrame = null;
         }
+    }
+
+    private void init()
+    {
+        mFaceList = new ArrayList<>();
+
+        mPictureQuantityProgressBar.setProgress(0);
+        mPictureQuantityProgressBar.setMax(Verification.FACE_IMAGE_QUANTITY);
     }
 
     private boolean trainFaces()

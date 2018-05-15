@@ -9,14 +9,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import edu.bk.thesis.biodiary.R;
-import edu.bk.thesis.biodiary.core.voice.SoundFeature;
 
 
 public class SetupVoiceFragment extends Fragment
 {
 
-    private Button       mRecordButton;
-    private SoundFeature mSoundFeature;
+    private Button mRecordButton;
+    // private SoundFeature mSoundFeature;
 
     @Nullable
     @Override
