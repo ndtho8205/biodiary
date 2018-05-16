@@ -285,7 +285,7 @@ public class VoiceAuthenticator
         Log.d(LOG_TAG, "sampleBufferSize: " + sampleSize);
 
 //        int sampleCount = mVoiceRecorder.getPayloadSize() / sampleSize;
-        int sampleCount = mVoiceRecorder.getRecordSize() / sampleSize;
+        int sampleCount = mVoiceRecorder.getPayloadSize() / sampleSize;
         Log.d(LOG_TAG, "sampleBufferCount: " + sampleCount);
 
         int windowCount = (int) Math.floor(sampleCount / Constants.WINDOWSIZE);

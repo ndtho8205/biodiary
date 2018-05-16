@@ -1,10 +1,8 @@
 package edu.bk.thesis.biodiary.core.voice.wav;
 
 import android.app.ProgressDialog;
-import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
-import android.media.MediaRecorder.AudioSource;
 import android.util.Log;
 
 import java.io.File;
@@ -18,7 +16,7 @@ import java.io.RandomAccessFile;
 
 /**
  * This class lets the user record audio from the built-in microphone as .wav file (as opposed to
- * .3gpp file using the AMR-NB codec when recording with the default {@link MediaRecorder}).
+ * .3gpp file using the AMR-NB codec when isRecording with the default {@link MediaRecorder}).
  *
  * @author Thomas Kaiser, AT
  */
@@ -38,73 +36,10 @@ public class WaveRecorder
     /**
      * The interval in which the recorded samples are output to the file.
      */
-    private static final int         TIMER_INTERVAL    = 120;
-    private static final String      DICTATE_TEMP_PATH = "./temp.wav";
-    private final        long        StopThreshold     = 1500; // TODO Setting: time in milliseconds
-    /**
-     * Recorder used for uncompressed recording.
-     */
-    private              AudioRecord aRecorder         = null;
+    private static final String DICTATE_TEMP_PATH = "./temp.wav";
 
-    /**
-     * Output file path.
-     */
-    private String fPath = null;
-
-    /**
-     * Recorder state, see {@link State}.
-     */
-    private State state;
-
-    /**
-     * File writer.
-     */
-    private RandomAccessFile fWriter;
-
-    // Number of channels, sample rate, sample size(size in bits), buffer size,
-    // audio source, sample size(see AudioFormat)
-    /**
-     * Number of channels (1).
-     */
-    private short numChannels;
-    /**
-     * Audio sampling rate.
-     */
-    private int   sampleRate;
-    /**
-     * Bits per sample (only 16 possible on HTC Magic).
-     */
-    private short bitsPerSample;
-    /**
-     * Size of audio-in buffer.
-     */
-    private int   bufferSize;
-    /**
-     * Audio source, {@link AudioSource}.
-     */
-    private int   audioSource;
-    /**
-     * {@link AudioFormat}.
-     */
-    private int   audioFormat;
-
-    /**
-     * Number of frames written to file on each output.
-     */
-    private int framePeriod;
-
-    /**
-     * How many bytes per block in the .wav file, needed for splitting/reconstructing the file.
-     */
-    private int blockAlign;
-
-    /**
-     * Buffer for output.
-     */
     private byte[] buffer;
 
-    private boolean recording;
-    private int StartThreshold = 350;// Set default value
     private ProgressDialog dialog;
     private int            sampleSize;
     private int            payload;
@@ -122,135 +57,10 @@ public class WaveRecorder
     private boolean mIsInserting = false;
 
     /**
-     * Default constructor. Leaves the recorder in {@link State#INITIALIZING}, except if some kind
-     * of error happens.
-     *
-     * @param sampleRate Audio sampling rate.
-     * @param dialog     the dialog box to update
-     */
-    public WaveRecorder(int sampleRate, ProgressDialog dialog)
-    {
-        this.dialog = dialog;
-        try {
-            recording = false;
-
-            bitsPerSample = 16;
-
-            numChannels = 1;
-
-            audioSource = AudioSource.MIC;
-            this.sampleRate = sampleRate;
-            audioFormat = AudioFormat.ENCODING_PCM_16BIT;
-
-            framePeriod = sampleRate * TIMER_INTERVAL / 1000;
-            bufferSize = framePeriod * 2 * bitsPerSample * numChannels / 8;
-            if (bufferSize < AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_IN_MONO,
-                                                          AudioFormat.ENCODING_PCM_16BIT)) {
-                // increase buffer size if needed
-                bufferSize = AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_IN_MONO,
-                                                          AudioFormat.ENCODING_PCM_16BIT);
-                // Set frame period and timer interval accordingly
-                framePeriod = bufferSize / (2 * bitsPerSample * numChannels / 8);
-                Log.w(LOG_TAG, "Increasing buffer size to " + bufferSize);
-            }
-
-            aRecorder = new AudioRecord(audioSource, sampleRate, AudioFormat.CHANNEL_IN_MONO,
-                                        AudioFormat.ENCODING_PCM_16BIT, bufferSize);
-            if (aRecorder.getState() != AudioRecord.STATE_INITIALIZED) {
-                throw new Exception("AudioRecord initialization failed");
-            }
-            aRecorder.setPositionNotificationPeriod(framePeriod);
-
-            fPath = null;
-            state = State.INITIALIZING;
-        }
-        catch (Exception e) {
-            if (e.getMessage() != null) {
-                Log.e(LOG_TAG, e.getMessage());
-            }
-            else {
-                Log.e(LOG_TAG, "Unknown error occured while initializing recording");
-            }
-            state = State.ERROR;
-        }
-    }
-
-    /**
-     * Default constructor. Leaves the recorder in {@link State#INITIALIZING}, except if some kind
-     * of error happens.
-     *
-     * @param sampleRate Audio sampling rate.
-     */
-    public WaveRecorder(int sampleRate)
-    {
-        try {
-            recording = false;
-            bitsPerSample = 16;
-
-            numChannels = 1;
-
-            audioSource = AudioSource.MIC;
-            this.sampleRate = sampleRate;
-            audioFormat = AudioFormat.ENCODING_PCM_16BIT;
-
-            framePeriod = sampleRate * TIMER_INTERVAL / 1000;
-            bufferSize = framePeriod * 2 * bitsPerSample * numChannels / 8;
-            if (bufferSize < AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_IN_MONO,
-                                                          AudioFormat.ENCODING_PCM_16BIT)) {
-                // increase buffer size if needed
-                bufferSize = AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_IN_MONO,
-                                                          AudioFormat.ENCODING_PCM_16BIT);
-                // Set frame period and timer interval accordingly
-                framePeriod = bufferSize / (2 * bitsPerSample * numChannels / 8);
-                Log.w(LOG_TAG, "Increasing buffer size to " + bufferSize);
-            }
-
-            aRecorder = new AudioRecord(audioSource, sampleRate, AudioFormat.CHANNEL_IN_MONO,
-                                        AudioFormat.ENCODING_PCM_16BIT, bufferSize);
-            if (aRecorder.getState() != AudioRecord.STATE_INITIALIZED) {
-                throw new Exception("AudioRecord initialization failed");
-            }
-            aRecorder.setPositionNotificationPeriod(framePeriod);
-
-            fPath = null;
-            state = State.INITIALIZING;
-        }
-        catch (Exception e) {
-            if (e.getMessage() != null) {
-                Log.e(LOG_TAG, e.getMessage());
-            }
-            else {
-                Log.e(LOG_TAG, "Unknown error occured while initializing recording");
-            }
-            state = State.ERROR;
-        }
-    }
-
-    public int getStartThreshold()
-    {
-        return StartThreshold;
-    }
-
-    public void setStartThreshold(int threshold)
-    {
-        if (threshold < 1) {
-            StartThreshold = 1;
-        }
-        else {
-            StartThreshold = threshold;
-        }
-    }
-
-    /**
      * Returns the state of the recorder.
      *
      * @return recorder state
      */
-    public State getState()
-    {
-        return state;
-    }
-
     /**
      * Sets the output file for the recorder, call in {@link State#INITIALIZING} , right after
      * constructing.
@@ -269,7 +79,7 @@ public class WaveRecorder
     }
 
     /**
-     * Prepares the recorder for recording, in case the recorder is not in the INITIALIZING state
+     * Prepares the recorder for isRecording, in case the recorder is not in the INITIALIZING state
      * and the file path was not set the recorder is set to the ERROR state, which makes a
      * reconstruction necessary. The header of the wave file is written. The file is DELETED! In
      * case of an exception, the state is changed to ERROR.
@@ -351,34 +161,8 @@ public class WaveRecorder
     }
 
     /**
-     * Releases the resources associated with this class, and removes the unnecessary files, when
-     * necessary.
-     */
-    public void release()
-    {
-        if (state == State.RECORDING) {
-            stop();
-        }
-        else {
-            if ((state == State.READY)) {
-                try {
-                    fWriter.close(); // Remove prepared file
-                }
-                catch (IOException e) {
-                    Log.e(LOG_TAG, "I/O exception occurred while closing output file");
-                }
-                (new File(fPath)).delete();
-            }
-        }
-
-        if (aRecorder != null) {
-            aRecorder.release();
-        }
-    }
-
-    /**
      * Resets the recorder to the INITIALIZING state, as if it was just created. In case the class
-     * was in RECORDING state, the recording is stopped. In case of exceptions the class is set to
+     * was in RECORDING state, the isRecording is stopped. In case of exceptions the class is set to
      * the ERROR state.
      */
     public void reset()
@@ -403,8 +187,8 @@ public class WaveRecorder
     }
 
     /**
-     * Starts the recording, and sets the state to RECORDING. Call after prepare() for first time
-     * recording or after stop() if you wish to continue recording.
+     * Starts the isRecording, and sets the state to RECORDING. Call after prepare() for first time
+     * isRecording or after stop() if you wish to continue isRecording.
      */
     public void start()
     {
@@ -415,7 +199,7 @@ public class WaveRecorder
      * See {@link #start()}, defaults to INSERTING a new part at the specified position.
      *
      * @param fromPosition Lets you set a position in bytes to insert a new part into an existing record. Use
-     *                     -1 to append to end. Find out current record size in bytes with {@link #getRecordSize()}.
+     *                     -1 to append to end. Find out current record size in bytes with {@link #getPayloadSize()}.
      */
     public void start(int fromPosition)
     {
@@ -424,7 +208,7 @@ public class WaveRecorder
 
     /**
      * See {@link #start()}. Enables inserting a new part by specifying a position to start
-     * recording from in bytes.
+     * isRecording from in bytes.
      *
      * @param fromPosition See {@link #start(int)}.
      * @param insert       Set true if you want to insert a new part, set false if the dicate should be
@@ -477,7 +261,7 @@ public class WaveRecorder
                     else {
                         tempCalc = tempCalc - StartThreshold;
 
-                        // Just to show that we are indeed recording (this will happen when the voice is only slightly
+                        // Just to show that we are indeed isRecording (this will happen when the voice is only slightly
                         // above the startThreshold
                         if (tempCalc < 11) {
                             tempCalc = 12;
@@ -521,10 +305,10 @@ public class WaveRecorder
 
                 if (temp > StartThreshold) {
                     startTime = System.currentTimeMillis();
-                    recording = true;
+                    isRecording = true;
                 }
 
-                if (recording) {
+                if (isRecording) {
                     try {
                         Log.i(LOG_TAG, "Recording Voice");
                         fWriter.write(buffer); // Write buffer to file
@@ -634,7 +418,7 @@ public class WaveRecorder
             result = result / countReads;
 
             aRecorder.stop();
-            recording = false;
+            isRecording = false;
 
             if (dialog != null) {
                 dialog.setProgress(0);
@@ -650,14 +434,14 @@ public class WaveRecorder
     }
 
     /**
-     * Stops the recording, and sets the state to STOPPED. In case of further usage, a reset is
-     * needed. Also finalizes the wave file in case of uncompressed recording.
+     * Stops the isRecording, and sets the state to STOPPED. In case of further usage, a reset is
+     * needed. Also finalizes the wave file in case of uncompressed isRecording.
      */
     public void stop()
     {
         if (state == State.RECORDING) {
             aRecorder.stop();
-            recording = false;
+            isRecording = false;
 
             if (dialog != null) {
                 dialog.setProgress(0);
@@ -672,7 +456,7 @@ public class WaveRecorder
                 fWriter.seek(40); // Write payload size to header
                 fWriter.writeInt(Integer.reverseBytes(payloadSize));
                 Log.d(LOG_TAG,
-                      "Stopped recording with payloadSize=" + payloadSize + ", was inserting? " +
+                      "Stopped isRecording with payloadSize=" + payloadSize + ", was inserting? " +
                       mIsInserting);
                 // if we have been inserting, copy back the second part
                 // of the file and correct the filesize values
@@ -698,8 +482,7 @@ public class WaveRecorder
                     payloadSize = dataSize;
                 }
 
-                Log.i(LOG_TAG, "Stopped recording, total payloadsize=" + payloadSize);
-
+                Log.i(LOG_TAG, "Stopped isRecording, total payloadsize=" + payloadSize);
             }
             catch (IOException e) {
                 Log.e(LOG_TAG, "I/O exception occured writing to output file in stop()");
@@ -713,46 +496,9 @@ public class WaveRecorder
         }
     }
 
-    /**
-     * Returns the recorded payload length of the .wav file.
-     *
-     * @return Size of the recorded audio file (payload part, add 44 bytes to get total filesize) in
-     * bytes.
-     */
-    public int getRecordSize()
-    {
-        return payloadSize;
-    }
-
-    /**
-     * Calculates the bitrate with current settings.
-     *
-     * @return The bitrate per second.
-     */
-    public int getBitsPerSecond()
-    {
-        return sampleRate * bitsPerSample * numChannels;
-    }
-
     public int getFrameSize()
     {
         return sampleSize;
-    }
-
-    public int getPayloadLength()
-    {
-        return payload;
-    }
-
-    public int readFromBuffer(byte[] buffer2, int currentPos, int sampleSize3)
-    {
-        int pos = currentPos;
-        for (int i = 0; i < sampleSize3; i++) {
-            buffer2[i] = finalBuffer[i + pos];
-        }
-        pos += sampleSize3;
-
-        return pos;
     }
 
     /**
@@ -778,31 +524,5 @@ public class WaveRecorder
         in.close();
     }
 
-    /**
-     * INITIALIZING : recorder is initializing; READY : recorder has been initialized, recorder not
-     * yet started RECORDING : recording ERROR : reconstruction needed STOPPED: reset needed.
-     */
-    public enum State
-    {
-        /**
-         * .
-         */
-        INITIALIZING,
-        /**
-         * .
-         */
-        READY,
-        /**
-         * .
-         */
-        RECORDING,
-        /**
-         * .
-         */
-        ERROR,
-        /**
-         * .
-         */
-        STOPPED
-    }
+
 }
