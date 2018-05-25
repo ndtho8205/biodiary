@@ -28,9 +28,6 @@ import edu.bk.thesis.biodiary.core.face.Preprocessing;
 import edu.bk.thesis.biodiary.core.face.Verification;
 import edu.bk.thesis.biodiary.utils.MessageHelper;
 
-import static org.bytedeco.javacpp.opencv_imgproc.COLOR_BGR2GRAY;
-import static org.bytedeco.javacpp.opencv_imgproc.cvtColor;
-
 
 public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCameraViewListener
 {
@@ -101,11 +98,10 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
     public Mat onCameraFrame(Mat image)
     {
         if (!(mTrainTask != null && mTrainTask.getStatus() != AsyncTask.Status.FINISHED)) {
-            Mat grayImage = new Mat();
 
-            cvtColor(image, grayImage, COLOR_BGR2GRAY);
-
-            mFaceInFrame = Detection.INSTANCE.detect(grayImage, String.valueOf(mFaceList.size()));
+            mFaceInFrame = Detection.INSTANCE.detect(image,
+                                                     String.valueOf(mFaceList.size()),
+                                                     false);
             if (mFaceInFrame != null) {
                 JavaCvUtils.INSTANCE.showDetectedFace(mFaceInFrame, image);
             }

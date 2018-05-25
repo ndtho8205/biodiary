@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.Log
 import edu.bk.thesis.biodiary.R
 import org.bytedeco.javacpp.opencv_core.*
+import org.bytedeco.javacpp.opencv_imgproc.COLOR_BGR2GRAY
+import org.bytedeco.javacpp.opencv_imgproc.cvtColor
 import org.bytedeco.javacpp.opencv_objdetect.CascadeClassifier
 
 object Detection
@@ -70,13 +72,24 @@ object Detection
         return Face.BoundingBox(faceRect.x(), faceRect.y(), faceRect.width(), faceRect.height())
     }
 
-    fun detect(imgGray: Mat, imageName: String = ""): Face?
+    fun detect(image: Mat, imageName: String = "", gray: Boolean): Face?
     {
-        val faceBoundingBox = findBoundingBox(imgGray) ?: return null
+        val grayImage: Mat
+        if (!gray)
+        {
+            grayImage = Mat()
+            cvtColor(image, grayImage, COLOR_BGR2GRAY)
+        } else
+        {
+            grayImage = image
+        }
+
+        val faceBoundingBox = findBoundingBox(grayImage) ?: return null
         val faceRect =
                 Rect(faceBoundingBox.x, faceBoundingBox.y, faceBoundingBox.w, faceBoundingBox.h)
-        val face = Mat(imgGray, faceRect)
+        val face = Mat(grayImage, faceRect)
 
-        return Face(face, faceBoundingBox, imageName)
+        return Face(image.clone(), face, faceBoundingBox, imageName)
     }
+
 }

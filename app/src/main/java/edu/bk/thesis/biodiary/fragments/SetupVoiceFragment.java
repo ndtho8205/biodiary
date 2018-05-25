@@ -16,6 +16,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import edu.bk.thesis.biodiary.R;
 import edu.bk.thesis.biodiary.core.voice.Constants;
+import edu.bk.thesis.biodiary.core.voice.SoundMeter;
 import edu.bk.thesis.biodiary.core.voice.math.mfcc.FeatureVector;
 import edu.bk.thesis.biodiary.core.voice.math.vq.Codebook;
 import edu.bk.thesis.biodiary.utils.MessageHelper;
@@ -87,7 +88,21 @@ public class SetupVoiceFragment extends BaseVoiceFragment
         mProcessingDialog.show();
         mSoundLevelDialog.show();
 
-        mComputeFeaturesTask = new ComputeFeaturesTask(String.valueOf(mAudioQuantityCounter));
+        SoundMeter soundMeter = new SoundMeter();
+        double     amplitude  = 0.0;
+        try {
+            soundMeter.start();
+            MessageHelper.showToast(getActivity(), "Please keep silence!", Toast.LENGTH_LONG);
+            Thread.sleep(3000);
+            amplitude = soundMeter.getAmplitude();
+            soundMeter.stop();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        mComputeFeaturesTask = new ComputeFeaturesTask(
+            String.valueOf(mAudioQuantityCounter) + "_" + amplitude);
         mComputeFeaturesTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
