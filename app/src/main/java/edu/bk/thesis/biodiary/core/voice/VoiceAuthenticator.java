@@ -38,7 +38,7 @@ public class VoiceAuthenticator
 
     public void setOutputFile(String filename)
     {
-        mVoiceRecorder.setOutputFile(StorageHelper.INSTANCE.retrieveVoiceModelPath(filename));
+        mVoiceRecorder.setOutputFile(StorageHelper.INSTANCE.retrieveAudioPath(filename));
     }
 
     public ArrayList<Codebook> getCodeBook()

@@ -184,7 +184,7 @@ public class SetupVoiceFragment extends BaseVoiceFragment
             if (result) {
                 mUserCodebook = mVoiceAuthenticator.getCodeBook();
                 SerializeArray.INSTANCE.saveArray(mUserCodebook,
-                                                  StorageHelper.INSTANCE.retrieveAudioPath(
+                                                  StorageHelper.INSTANCE.retrieveVoiceModelPath(
                                                       "codebook.yml"));
                 MessageHelper.showToast(getActivity(),
                                         "Saved user successfully",
