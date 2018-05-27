@@ -57,11 +57,14 @@ public class SetupVoiceFragment extends BaseVoiceFragment
     @OnClick (R.id.setup_voice_pb_audio_quantity)
     void recordVoice()
     {
-        if (mAudioQuantityCounter < Constants.VOICE_AUDIO_QUANTITY) {
-            Log.i(TAG, "Recording...");
+        if (mComputeFeaturesTask != null &&
+            mComputeFeaturesTask.getStatus() != AsyncTask.Status.FINISHED) {
             MessageHelper.showToast(getActivity(),
-                                    "Clearly read the phrase out loud.",
-                                    Toast.LENGTH_LONG);
+                                    "Compute feature still running.",
+                                    Toast.LENGTH_SHORT);
+        }
+        else if (mAudioQuantityCounter < Constants.VOICE_AUDIO_QUANTITY) {
+            Log.i(TAG, "Recording...");
             startRecording();
         }
         else {
@@ -71,16 +74,8 @@ public class SetupVoiceFragment extends BaseVoiceFragment
 
     void trainVoices()
     {
-        if (mComputeFeaturesTask != null &&
-            mComputeFeaturesTask.getStatus() != AsyncTask.Status.FINISHED) {
-            MessageHelper.showToast(getActivity(),
-                                    "Training task is still running",
-                                    Toast.LENGTH_SHORT);
-        }
-        else {
-            mProcessingDialog.show();
-            new TrainTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        }
+        mProcessingDialog.show();
+        new TrainTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private void startRecording()
@@ -91,7 +86,10 @@ public class SetupVoiceFragment extends BaseVoiceFragment
         SoundMeter soundMeter = new SoundMeter();
         double     amplitude  = 0.0;
         try {
-            MessageHelper.showToast(getActivity(), "Please keep silence!", Toast.LENGTH_LONG);
+            MessageHelper.showToast(getActivity(),
+                                    "Please keep silence in 3 seconds!",
+                                    Toast.LENGTH_SHORT);
+
             soundMeter.start();
             soundMeter.getAmplitude();
             Thread.sleep(3000);
@@ -129,6 +127,7 @@ public class SetupVoiceFragment extends BaseVoiceFragment
         {
             Log.i(TAG, "Compute features of new audio");
             Log.d(TAG, "Mic threshold: " + mVoiceAuthenticator.getMicThreshold());
+
             mVoiceAuthenticator.startRecording();
             mSoundLevelDialog.dismiss();
 
@@ -142,6 +141,14 @@ public class SetupVoiceFragment extends BaseVoiceFragment
                 mAudioQuantityCounter++;
                 return true;
             }
+        }
+
+        @Override
+        protected void onPreExecute()
+        {
+            MessageHelper.showToast(getActivity(),
+                                    "Clearly read the phrase out loud.",
+                                    Toast.LENGTH_LONG);
         }
 
         @Override
@@ -177,8 +184,7 @@ public class SetupVoiceFragment extends BaseVoiceFragment
             if (result) {
                 mUserCodebook = mVoiceAuthenticator.getCodeBook();
                 SerializeArray.INSTANCE.saveArray(mUserCodebook,
-                                                  StorageHelper.INSTANCE.retrievePrivatePath(
-                                                      getActivity(),
+                                                  StorageHelper.INSTANCE.retrieveAudioPath(
                                                       "codebook.yml"));
                 MessageHelper.showToast(getActivity(),
                                         "Saved user successfully",

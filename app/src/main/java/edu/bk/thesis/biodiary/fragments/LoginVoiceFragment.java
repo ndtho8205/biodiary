@@ -59,8 +59,7 @@ public class LoginVoiceFragment extends BaseVoiceFragment
         ButterKnife.bind(this, view);
 
         mUserCodebook
-            = SerializeArray.INSTANCE.loadArray(StorageHelper.INSTANCE.retrievePrivatePath(
-            getActivity(),
+            = SerializeArray.INSTANCE.loadArray(StorageHelper.INSTANCE.retrieveVoiceModelPath(
             "codebook.yml"));
 
         mSoundLevelDialog.setMessage("Say: \"The quick brown fox jumps over the lazy dog\"");

@@ -1,6 +1,5 @@
 package edu.bk.thesis.biodiary.utils
 
-import android.content.Context
 import android.os.Environment
 import android.util.Log
 import java.io.File
@@ -34,10 +33,10 @@ object StorageHelper
             voice.mkdirs()
     }
 
-    private fun getStorageDir(): File?
+    private fun getStorageDir(): File
     {
         if (!isExternalStorageWritable())
-            return null
+            Log.e(TAG, "Cannot open external storage.")
 
         val file = File(Environment.getExternalStorageDirectory(), "BioDiary")
         if (!file.mkdirs())
@@ -48,32 +47,32 @@ object StorageHelper
         return file
     }
 
-    fun retrieveImagePath(imageName: String): String?
+    fun retrieveImagePath(imageName: String): String
     {
-        val dir = getStorageDir() ?: return null
+        val dir = getStorageDir()
         return File(dir, "Face/$imageName.png").absolutePath
     }
 
-    fun retrieveAudioPath(audioName: String): String?
+    fun retrieveAudioPath(audioName: String): String
     {
-        val dir = getStorageDir() ?: return null
+        val dir = getStorageDir()
         return File(dir, "Voice/$audioName.wav").absolutePath
     }
 
-    fun retrievePrivatePath(context: Context, filename: String): String
-    {
-        return context.getFileStreamPath(filename).absolutePath
-    }
+//    fun retrievePrivatePath(context: Context, filename: String): String
+//    {
+//        return context.getFileStreamPath(filename).absolutePath
+//    }
 
-    fun retrieveFaceModelPath(modelName: String): String?
+    fun retrieveFaceModelPath(modelName: String): String
     {
-        val dir = getStorageDir() ?: return null
+        val dir = getStorageDir()
         return File(dir, "Face/$modelName").absolutePath
     }
 
-    fun retrieveVoiceModelPath(modelName: String): String?
+    fun retrieveVoiceModelPath(modelName: String): String
     {
-        val dir = getStorageDir() ?: return null
+        val dir = getStorageDir()
         return File(dir, "Voice/$modelName").absolutePath
     }
 }

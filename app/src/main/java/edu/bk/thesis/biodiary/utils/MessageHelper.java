@@ -14,10 +14,17 @@ public class MessageHelper
         if (duration != Toast.LENGTH_SHORT && duration != Toast.LENGTH_LONG) {
             throw new IllegalArgumentException();
         }
-        if (mToast != null && mToast.getView().isShown()) {
+        if (mToast != null) {
             mToast.cancel();
         }
         mToast = Toast.makeText(context, message, duration);
         mToast.show();
+    }
+
+    public static void cancelToast()
+    {
+        if (mToast != null) {
+            mToast.cancel();
+        }
     }
 }
