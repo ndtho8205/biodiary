@@ -21,11 +21,10 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import edu.bk.thesis.biodiary.R;
 import edu.bk.thesis.biodiary.core.face.CvCameraPreview;
-import edu.bk.thesis.biodiary.core.face.Detection;
 import edu.bk.thesis.biodiary.core.face.Face;
+import edu.bk.thesis.biodiary.core.face.FaceDetection;
+import edu.bk.thesis.biodiary.core.face.FaceVerification;
 import edu.bk.thesis.biodiary.core.face.JavaCvUtils;
-import edu.bk.thesis.biodiary.core.face.Preprocessing;
-import edu.bk.thesis.biodiary.core.face.Verification;
 import edu.bk.thesis.biodiary.utils.MessageHelper;
 
 
@@ -39,12 +38,14 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
     @BindView (R.id.setup_face_pb_pictures_quantity)
     ProgressBar     mPictureQuantityProgressBar;
 
+    private FaceDetection    mFaceDetector;
+
     private Face       mFaceInFrame;
     private List<Face> mFaceList;
 
-    private Verification.TrainTask mTrainTask;
-    private Verification.TrainTask.Callback mTrainFacesTaskCallback
-        = new Verification.TrainTask.Callback()
+    private FaceVerification.TrainTask mTrainTask;
+    private FaceVerification.TrainTask.Callback mTrainFacesTaskCallback
+        = new FaceVerification.TrainTask.Callback()
     {
         @Override
         public void onTrainComplete(boolean result)
@@ -54,8 +55,6 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
                 for (Face face : mFaceList) {
                     face.save();
                 }
-                Log.d(TAG, "Save model");
-                Verification.INSTANCE.save(getActivity());
                 MessageHelper.showToast(getActivity(), "Training complete", Toast.LENGTH_SHORT);
             }
             else {
@@ -76,6 +75,8 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
         ButterKnife.bind(this, view);
 
         mCameraView.setCvCameraViewListener(this);
+
+        mFaceDetector = new FaceDetection(getActivity());
 
         init();
 
@@ -99,9 +100,7 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
     {
         if (!(mTrainTask != null && mTrainTask.getStatus() != AsyncTask.Status.FINISHED)) {
 
-            mFaceInFrame = Detection.INSTANCE.detect(image,
-                                                     String.valueOf(mFaceList.size()),
-                                                     false);
+            mFaceInFrame = mFaceDetector.detect(image, String.valueOf(mFaceList.size()));
             if (mFaceInFrame != null) {
                 JavaCvUtils.INSTANCE.showDetectedFace(mFaceInFrame, image);
             }
@@ -113,18 +112,17 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
     @OnClick (R.id.setup_face_pb_pictures_quantity)
     void takePicture()
     {
-        if (mFaceInFrame != null && mFaceList.size() < Verification.FACE_IMAGE_QUANTITY) {
+        if (mFaceInFrame != null && mFaceList.size() < FaceVerification.FACE_IMAGE_QUANTITY) {
             mCameraView.shootSound();
             Log.i(TAG, "Take picture for training later." + mFaceList.size());
 
-            Preprocessing.INSTANCE.scaleToStandardSize(mFaceInFrame);
             Log.d(TAG,
-                  mFaceInFrame.getAlignedImage().rows() + "x" +
-                  mFaceInFrame.getAlignedImage().cols());
+                  mFaceInFrame.getAlignedFaceImage().rows() + "x" +
+                  mFaceInFrame.getAlignedFaceImage().cols());
 
             mFaceList.add(mFaceInFrame);
             mPictureQuantityProgressBar.setProgress(mFaceList.size());
-            if (mFaceList.size() == Verification.FACE_IMAGE_QUANTITY) {
+            if (mFaceList.size() == FaceVerification.FACE_IMAGE_QUANTITY) {
                 trainFaces();
             }
 
@@ -137,7 +135,7 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
         mFaceList = new ArrayList<>();
 
         mPictureQuantityProgressBar.setProgress(0);
-        mPictureQuantityProgressBar.setMax(Verification.FACE_IMAGE_QUANTITY);
+        mPictureQuantityProgressBar.setMax(FaceVerification.FACE_IMAGE_QUANTITY);
     }
 
     private boolean trainFaces()
@@ -152,7 +150,9 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
         }
 
         Log.i(TAG, "Training Eigenfaces");
-        mTrainTask = new Verification.TrainTask(getActivity(), mFaceList, mTrainFacesTaskCallback);
+        mTrainTask = new FaceVerification.TrainTask(getActivity(),
+                                                    mFaceList,
+                                                    mTrainFacesTaskCallback);
         mTrainTask.execute();
 
         return true;

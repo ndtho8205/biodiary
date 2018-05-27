@@ -111,7 +111,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
      * This is the array that will be filled everytime a single preview frame is
      * ready to be processed (for example when we want to show to the user
      * a transformed preview instead of the original one, or when we want to
-     * make some image analysis in real-time without taking full-sized pictures).
+     * make some faceImage analysis in real-time without taking full-sized pictures).
      */
     private   byte[]            previewBuffer;
     /**
@@ -715,7 +715,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
                     parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
                 }
 
-                cameraDevice.setParameters(parameters); // save everything
+                cameraDevice.setParameters(parameters); // saveTrainedModel everything
 
                 // print saved parameters
                 int prevWidth  = cameraDevice.getParameters().getPreviewSize().width;
@@ -859,7 +859,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
 
         int degree = getRotationDegree();
 
-        cameraDevice.setDisplayOrientation(degree); // save settings
+        cameraDevice.setDisplayOrientation(degree); // saveTrainedModel settings
     }
 
     private int getRotationDegree()

@@ -91,8 +91,9 @@ public class SetupVoiceFragment extends BaseVoiceFragment
         SoundMeter soundMeter = new SoundMeter();
         double     amplitude  = 0.0;
         try {
-            soundMeter.start();
             MessageHelper.showToast(getActivity(), "Please keep silence!", Toast.LENGTH_LONG);
+            soundMeter.start();
+            soundMeter.getAmplitude();
             Thread.sleep(3000);
             amplitude = soundMeter.getAmplitude();
             soundMeter.stop();

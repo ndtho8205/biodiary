@@ -17,11 +17,10 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import edu.bk.thesis.biodiary.R;
 import edu.bk.thesis.biodiary.core.face.CvCameraPreview;
-import edu.bk.thesis.biodiary.core.face.Detection;
 import edu.bk.thesis.biodiary.core.face.Face;
+import edu.bk.thesis.biodiary.core.face.FaceDetection;
+import edu.bk.thesis.biodiary.core.face.FaceVerification;
 import edu.bk.thesis.biodiary.core.face.JavaCvUtils;
-import edu.bk.thesis.biodiary.core.face.Preprocessing;
-import edu.bk.thesis.biodiary.core.face.Verification;
 import edu.bk.thesis.biodiary.handlers.PreferencesHandler;
 import edu.bk.thesis.biodiary.utils.MessageHelper;
 import edu.bk.thesis.biodiary.utils.PermissionHelper;
@@ -35,10 +34,13 @@ public class LoginFaceFragment extends Fragment implements CvCameraPreview.CvCam
     @BindView (R.id.login_face_camera_view)
     CvCameraPreview mCameraView;
 
+    private FaceDetection    mFaceDetector;
+    private FaceVerification mFaceVerifior;
+
     private Face mFaceInFrame;
 
-    private Verification.PredictTask.Callback mPredictFaceTaskCallback
-        = new Verification.PredictTask.Callback()
+    private FaceVerification.PredictTask.Callback mPredictFaceTaskCallback
+        = new FaceVerification.PredictTask.Callback()
     {
         @Override
         public void onPredictComplete(double distance)
@@ -62,6 +64,10 @@ public class LoginFaceFragment extends Fragment implements CvCameraPreview.CvCam
 
         mCameraView.setCvCameraViewListener(this);
 
+        mFaceDetector = new FaceDetection(getActivity());
+        mFaceVerifior = new FaceVerification();
+        mFaceVerifior.loadTrainedModel();
+
         mPreferencesHandler = new PreferencesHandler(getActivity().getApplicationContext());
 
         return view;
@@ -82,9 +88,7 @@ public class LoginFaceFragment extends Fragment implements CvCameraPreview.CvCam
     @Override
     public Mat onCameraFrame(Mat image)
     {
-        mFaceInFrame = Detection.INSTANCE.detect(image,
-                                                 "test_" + System.currentTimeMillis(),
-                                                 false);
+        mFaceInFrame = mFaceDetector.detect(image, "test_" + System.currentTimeMillis());
         if (mFaceInFrame != null) {
             JavaCvUtils.INSTANCE.showDetectedFace(mFaceInFrame, image);
         }
@@ -98,13 +102,12 @@ public class LoginFaceFragment extends Fragment implements CvCameraPreview.CvCam
             mCameraView.shootSound();
             Log.d(TAG, "Take picture and start verification...");
 
-            Preprocessing.INSTANCE.scaleToStandardSize(mFaceInFrame);
             Log.d(TAG,
-                  "Size: " + mFaceInFrame.getAlignedImage().rows() + " x " +
-                  mFaceInFrame.getAlignedImage().cols());
+                  "Size: " + mFaceInFrame.getAlignedFaceImage().rows() + " x " +
+                  mFaceInFrame.getAlignedFaceImage().cols());
 
             mFaceInFrame.save();
-            Verification.INSTANCE.predict(mFaceInFrame, mPredictFaceTaskCallback);
+            mFaceVerifior.predict(mFaceInFrame, mPredictFaceTaskCallback);
 
             mFaceInFrame = null;
         }

@@ -4,7 +4,7 @@ import org.bytedeco.javacpp.indexer.UByteBufferIndexer;
 import org.bytedeco.javacpp.opencv_core.Mat;
 
 
-public class ComputeQuality
+public class FaceQualityComputation
 {
 
     // Calculate brightness of image based on YUV color space

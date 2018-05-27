@@ -1,43 +1,66 @@
 package edu.bk.thesis.biodiary.core.voice;
 
 import android.media.MediaRecorder;
+import android.util.Log;
 
-/**
- * Created by L on 2018/05/08.
- */
+import java.io.IOException;
 
-public class SoundMeter {
+
+public class SoundMeter
+{
 
     private MediaRecorder mRecorder = null;
 
-    public void start() throws Exception {
-        if (mRecorder == null) {
-            mRecorder = new MediaRecorder();
-            mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+    private boolean mState = false;
 
-            mRecorder.setOutputFile("/dev/null");
-            mRecorder.prepare();
-            mRecorder.start();
+    public void start()
+    {
+        if (mRecorder == null) {
+
+            try {
+                mRecorder = new MediaRecorder();
+                mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+                mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+                mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+                mRecorder.setOutputFile("/dev/null");
+                mRecorder.prepare();
+                mState = true;
+                mRecorder.start();
+            }
+            catch (IOException e) {
+                mState = false;
+                e.printStackTrace();
+            }
         }
     }
 
-    public void stop() {
+    public void stop()
+    {
         if (mRecorder != null) {
+            mState = false;
+
             mRecorder.stop();
             mRecorder.release();
             mRecorder = null;
         }
     }
 
-    public double getAmplitude() {
-        if (mRecorder != null) {
-            System.out.println("asdfds");
-            return mRecorder.getMaxAmplitude();
-        }
-        else
-            return 0;
+    public double getAmplitude()
+    {
 
+        if (mRecorder != null) {
+            int amplitude = mRecorder.getMaxAmplitude();
+            Log.d("SoundMeter", "getAmplitude " + amplitude);
+            return amplitude;
+        }
+        else {
+            return 0;
+        }
+
+    }
+
+    public boolean getState()
+    {
+        return mState;
     }
 }

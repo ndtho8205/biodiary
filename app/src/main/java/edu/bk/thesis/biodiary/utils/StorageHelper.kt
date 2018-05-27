@@ -22,11 +22,16 @@ object StorageHelper
             throw IOException("Cannot open external storage.")
 
         val file = File(Environment.getExternalStorageDirectory(), "BioDiary")
+        if (!file.exists())
+            file.mkdirs()
+
         val face = File(file, "Face")
+        if (!face.exists())
+            face.mkdirs()
+
         val voice = File(file, "Voice")
-        file.mkdirs()
-        face.mkdirs()
-        voice.mkdirs()
+        if (!voice.exists())
+            voice.mkdirs()
     }
 
     private fun getStorageDir(): File?
@@ -58,5 +63,17 @@ object StorageHelper
     fun retrievePrivatePath(context: Context, filename: String): String
     {
         return context.getFileStreamPath(filename).absolutePath
+    }
+
+    fun retrieveFaceModelPath(modelName: String): String?
+    {
+        val dir = getStorageDir() ?: return null
+        return File(dir, "Face/$modelName").absolutePath
+    }
+
+    fun retrieveVoiceModelPath(modelName: String): String?
+    {
+        val dir = getStorageDir() ?: return null
+        return File(dir, "Voice/$modelName").absolutePath
     }
 }

@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 
-import edu.bk.thesis.biodiary.core.face.Detection;
-import edu.bk.thesis.biodiary.core.face.Verification;
 import edu.bk.thesis.biodiary.handlers.PreferencesHandler;
 import edu.bk.thesis.biodiary.utils.PermissionHelper;
 import edu.bk.thesis.biodiary.utils.StorageHelper;
@@ -62,11 +60,6 @@ public class SplashScreenActivity extends AppCompatActivity
         mPreferencesHandler = new PreferencesHandler(getApplicationContext());
 
         StorageHelper.INSTANCE.setupStorageDir();
-        Detection.INSTANCE.load(getApplicationContext());
-
-        if (mPreferencesHandler.isSetUp()) {
-            Verification.INSTANCE.load(getApplicationContext());
-        }
 
         if (!mPreferencesHandler.isSetUp()) {
             Intent intentToStartWelcomeActivity = new Intent(getApplicationContext(),
