@@ -38,7 +38,7 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
     @BindView (R.id.setup_face_pb_pictures_quantity)
     ProgressBar     mPictureQuantityProgressBar;
 
-    private FaceDetection    mFaceDetector;
+    private FaceDetection mFaceDetector;
 
     private Face       mFaceInFrame;
     private List<Face> mFaceList;
@@ -81,6 +81,44 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
         init();
 
         return view;
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        Log.d(TAG, "onResume");
+
+        if (mCameraView != null) {
+            mCameraView.enableView();
+        }
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+
+        Log.d(TAG, "onPause");
+
+        if (mCameraView != null) {
+            mCameraView.disableView();
+        }
+    }
+
+    @Override
+    public void onStop()
+    {
+        super.onStop();
+        Log.d(TAG, "onStop");
+    }
+
+    @Override
+    public void onDestroyView()
+    {
+        super.onDestroyView();
+
+        Log.d(TAG, "onDestroyView");
     }
 
     @Override
