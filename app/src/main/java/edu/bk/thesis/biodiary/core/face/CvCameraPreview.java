@@ -239,24 +239,6 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
         cam.addCallbackBuffer(previewBuffer);
     }
 
-    public void disableView()
-    {
-        synchronized (syncObject) {
-            Log.d("CvCameraPreview", "disableView()");
-            enabled = false;
-            checkCurrentState();
-        }
-    }
-
-    public void enableView()
-    {
-        synchronized (syncObject) {
-            Log.d("CvCameraPreview", "enableView()");
-            enabled = true;
-            checkCurrentState();
-        }
-    }
-
     /**
      * Used to check if the app is running on an emulator or not.
      * See: http://stackoverflow.com/a/27233595/2175837.

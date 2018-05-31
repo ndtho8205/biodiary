@@ -84,44 +84,6 @@ public class SetupFaceFragment extends Fragment implements CvCameraPreview.CvCam
     }
 
     @Override
-    public void onResume()
-    {
-        super.onResume();
-        Log.d(TAG, "onResume");
-
-        if (mCameraView != null) {
-            mCameraView.enableView();
-        }
-    }
-
-    @Override
-    public void onPause()
-    {
-        super.onPause();
-
-        Log.d(TAG, "onPause");
-
-        if (mCameraView != null) {
-            mCameraView.disableView();
-        }
-    }
-
-    @Override
-    public void onStop()
-    {
-        super.onStop();
-        Log.d(TAG, "onStop");
-    }
-
-    @Override
-    public void onDestroyView()
-    {
-        super.onDestroyView();
-
-        Log.d(TAG, "onDestroyView");
-    }
-
-    @Override
     public void onCameraViewStarted(int width, int height)
     {
 
