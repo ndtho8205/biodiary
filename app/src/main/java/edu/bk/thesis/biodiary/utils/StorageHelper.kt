@@ -20,7 +20,8 @@ object StorageHelper
         if (!isExternalStorageWritable())
             throw IOException("Cannot open external storage.")
 
-        val file = File(Environment.getExternalStorageDirectory(), "BioDiary")
+        val file = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_ALARMS),
+                        "BioDiary")
         if (!file.exists())
             file.mkdirs()
 
@@ -38,13 +39,19 @@ object StorageHelper
         if (!isExternalStorageWritable())
             Log.e(TAG, "Cannot open external storage.")
 
-        val file = File(Environment.getExternalStorageDirectory(), "BioDiary")
+        val file = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_ALARMS),
+                        "BioDiary")
         if (!file.mkdirs())
         {
             Log.e(TAG, "Directory not created")
         }
 
         return file
+    }
+
+    fun retrieveTensorflowModelPath(): String
+    {
+        return File(getStorageDir(), "frozen_mlpThesis.pb").absolutePath
     }
 
     fun retrieveImagePath(imageName: String): String

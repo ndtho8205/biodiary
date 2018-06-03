@@ -1,6 +1,8 @@
 package edu.bk.thesis.biodiary.fragments;
 
 import android.Manifest;
+import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -11,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import org.bytedeco.javacpp.opencv_core.Mat;
+import org.jetbrains.annotations.NotNull;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -19,9 +22,10 @@ import edu.bk.thesis.biodiary.R;
 import edu.bk.thesis.biodiary.core.face.CvCameraPreview;
 import edu.bk.thesis.biodiary.core.face.Face;
 import edu.bk.thesis.biodiary.core.face.FaceDetection;
+import edu.bk.thesis.biodiary.core.face.FaceQualityComputation;
 import edu.bk.thesis.biodiary.core.face.FaceVerification;
 import edu.bk.thesis.biodiary.core.face.JavaCvUtils;
-import edu.bk.thesis.biodiary.handlers.PreferencesHandler;
+import edu.bk.thesis.biodiary.models.FaceData;
 import edu.bk.thesis.biodiary.utils.MessageHelper;
 import edu.bk.thesis.biodiary.utils.PermissionHelper;
 
@@ -34,21 +38,62 @@ public class LoginFaceFragment extends Fragment implements CvCameraPreview.CvCam
     @BindView (R.id.login_face_camera_view)
     CvCameraPreview mCameraView;
 
-    private FaceDetection    mFaceDetector;
-    private FaceVerification mFaceVerifior;
+    private FaceDetection          mFaceDetector;
+    private FaceQualityComputation mQualityComputation;
 
     private Face mFaceInFrame;
 
+    private FaceVerification.PredictTask mPredictTask;
+    private OnLoginFaceCallbackReceived  mOnLoginFaceCallbackReceived;
     private FaceVerification.PredictTask.Callback mPredictFaceTaskCallback
         = new FaceVerification.PredictTask.Callback()
     {
         @Override
-        public void onPredictComplete(double distance)
+        public void onPredictComplete(boolean result, @NotNull Face face, double distance)
         {
-            MessageHelper.showToast(getActivity(), "Distance: " + distance, Toast.LENGTH_LONG);
+            if (result) {
+
+                double qualityBrightness
+                    = mQualityComputation.computeBrightnessScore(face.getContainerImage());
+                double qualityContrast
+                    = mQualityComputation.computeContrastScore(face.getFaceImage());
+                double qualitySharpness
+                    = mQualityComputation.computeSharpnessScore(face.getFaceImage());
+
+                String faceData = distance + ";" + qualityBrightness + ";" + qualityContrast + ";" +
+                                  qualitySharpness;
+                Log.d(TAG, faceData);
+
+
+                face.setFaceImageName(face.getFaceImageName() + "_" + faceData);
+                face.save();
+
+                FaceData data = new FaceData(distance / 8000.0,
+                                             qualityBrightness / 255.0,
+                                             (qualityContrast - 30.0) / 50.0,
+                                             (qualitySharpness - 1.0) / 10.0);
+
+                mOnLoginFaceCallbackReceived.updateFaceData(data);
+
+                MessageHelper.showToast(getActivity(),
+                                        "Picture is taken. Next step, please.",
+                                        Toast.LENGTH_LONG);
+            }
+            else {
+                MessageHelper.showToast(getActivity(),
+                                        "Computing feature failed. Take picture again.",
+                                        Toast.LENGTH_LONG);
+            }
         }
     };
-    private PreferencesHandler mPreferencesHandler;
+
+    @Override
+    public void onAttach(Context context)
+    {
+        super.onAttach(context);
+
+        mOnLoginFaceCallbackReceived = (OnLoginFaceCallbackReceived) getActivity();
+    }
 
     @Nullable
     @Override
@@ -65,10 +110,7 @@ public class LoginFaceFragment extends Fragment implements CvCameraPreview.CvCam
         mCameraView.setCvCameraViewListener(this);
 
         mFaceDetector = new FaceDetection(getActivity());
-        mFaceVerifior = new FaceVerification();
-        mFaceVerifior.loadTrainedModel();
-
-        mPreferencesHandler = new PreferencesHandler(getActivity().getApplicationContext());
+        mQualityComputation = new FaceQualityComputation();
 
         return view;
     }
@@ -88,9 +130,11 @@ public class LoginFaceFragment extends Fragment implements CvCameraPreview.CvCam
     @Override
     public Mat onCameraFrame(Mat image)
     {
-        mFaceInFrame = mFaceDetector.detect(image, "test_" + System.currentTimeMillis());
-        if (mFaceInFrame != null) {
-            JavaCvUtils.INSTANCE.showDetectedFace(mFaceInFrame, image);
+        if (!(mPredictTask != null && mPredictTask.getStatus() != AsyncTask.Status.FINISHED)) {
+            mFaceInFrame = mFaceDetector.detect(image, "login_" + System.currentTimeMillis());
+            if (mFaceInFrame != null) {
+                JavaCvUtils.INSTANCE.showDetectedFace(mFaceInFrame, image);
+            }
         }
         return image;
     }
@@ -106,10 +150,29 @@ public class LoginFaceFragment extends Fragment implements CvCameraPreview.CvCam
                   "Size: " + mFaceInFrame.getAlignedFaceImage().rows() + " x " +
                   mFaceInFrame.getAlignedFaceImage().cols());
 
-            mFaceInFrame.save();
-            mFaceVerifior.predict(mFaceInFrame, mPredictFaceTaskCallback);
+            predictFace();
 
             mFaceInFrame = null;
         }
+    }
+
+    private void predictFace()
+    {
+        if (mPredictTask != null && mPredictTask.getStatus() != AsyncTask.Status.FINISHED) {
+            Log.i(TAG, "Predicting task is still running");
+        }
+        else {
+
+            mPredictTask = new FaceVerification.PredictTask(getActivity(),
+                                                            mFaceInFrame,
+                                                            mPredictFaceTaskCallback);
+            mPredictTask.execute();
+        }
+    }
+
+    public interface OnLoginFaceCallbackReceived
+    {
+
+        void updateFaceData(FaceData faceData);
     }
 }

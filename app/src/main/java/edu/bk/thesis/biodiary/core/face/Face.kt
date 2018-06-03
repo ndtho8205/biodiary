@@ -6,8 +6,8 @@ import org.bytedeco.javacpp.opencv_core.Mat
 import org.bytedeco.javacpp.opencv_imgproc.COLOR_RGB2BGR
 import org.bytedeco.javacpp.opencv_imgproc.cvtColor
 
-data class Face(private val containerImage: Mat,
-                val faceImageName: String,
+data class Face(val containerImage: Mat,
+                var faceImageName: String,
                 val faceImage: Mat,
                 val boundingBox: BoundingBox)
 {

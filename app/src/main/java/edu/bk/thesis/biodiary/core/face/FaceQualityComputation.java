@@ -1,6 +1,6 @@
 package edu.bk.thesis.biodiary.core.face;
 
-import org.bytedeco.javacpp.indexer.UByteBufferIndexer;
+import org.bytedeco.javacpp.indexer.UByteRawIndexer;
 import org.bytedeco.javacpp.opencv_core.Mat;
 
 
@@ -12,7 +12,7 @@ public class FaceQualityComputation
     {
         float brightness;
 
-        UByteBufferIndexer brightElem = rgbaMat.createIndexer();
+        UByteRawIndexer brightElem = rgbaMat.createIndexer();
         float              sum        = 0;
         for (int x = 0; x < rgbaMat.rows(); x++) {
             for (int y = 0; y < rgbaMat.cols(); y++) {
@@ -33,7 +33,7 @@ public class FaceQualityComputation
     {
         float contrast;
 
-        UByteBufferIndexer contrastElem = grayMat.createIndexer();
+        UByteRawIndexer contrastElem = grayMat.createIndexer();
         float              mean         = 0;
         for (int x = 0; x < grayMat.rows(); x++) {
             for (int y = 0; y < grayMat.cols(); y++) {
@@ -59,7 +59,7 @@ public class FaceQualityComputation
     {
         float sharpness;
 
-        UByteBufferIndexer sharpElem = grayMat.createIndexer();
+        UByteRawIndexer sharpElem = grayMat.createIndexer();
 
         float sumX = 0;
         for (int x = 0; x < grayMat.rows(); x++) {

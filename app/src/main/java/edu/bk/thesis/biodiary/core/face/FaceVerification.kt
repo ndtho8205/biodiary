@@ -35,10 +35,11 @@ class FaceVerification
         {
             val modelPath = StorageHelper.retrieveFaceModelPath(MODEL_FILENAME)
             mRecognizer.load(modelPath)
+            Log.i(TAG, "Face model loaded")
             true
         } catch (e: Exception)
         {
-            Log.e(TAG, "Error ${e.message}", e)
+            e.printStackTrace()
             false
         }
     }
@@ -47,6 +48,7 @@ class FaceVerification
     {
         val modelPath = StorageHelper.retrieveFaceModelPath(MODEL_FILENAME)
         mRecognizer.save(modelPath)
+        Log.i(TAG, "Face model saved")
     }
 
     fun train(faces: List<Face>): Boolean
@@ -63,7 +65,7 @@ class FaceVerification
             true
         } catch (e: Exception)
         {
-            Log.e(TAG, "Error: ${e.message}", e)
+            e.printStackTrace()
             false
         }
     }
@@ -82,9 +84,9 @@ class FaceVerification
         return labels
     }
 
-    fun predict(testFace: Face, callback: PredictTask.Callback? = null): Double
+    fun predict(testFace: Face): Double
     {
-        if (mIsTrained)
+        return try
         {
             val label = IntPointer(1)
             val confidence = DoublePointer(1)
@@ -98,29 +100,66 @@ class FaceVerification
             Log.d(TAG, "Predicted label: $predictedLabel")
             Log.d(TAG, "Confidence: $predictedConfidence")
 
-            callback?.onPredictComplete(predictedConfidence)
-
-            return predictedConfidence
-        } else
+            predictedConfidence
+        } catch (e: Exception)
         {
-            throw Exception("FaceVerification is not trained.")
+            e.printStackTrace()
+            -1.0
         }
     }
 
-    fun predict(testFaces: List<Face>, callback: PredictTask.Callback? = null): List<Double>
+    fun predict(testFaces: List<Face>): List<Double>
     {
         return testFaces.map {
-            predict(it, callback)
+            predict(it)
         }
     }
 
-    object PredictTask
+    class PredictTask(context: Context, private val face: Face, private val callback: Callback?) :
+            AsyncTask<Void, Void, Boolean>()
     {
+
+        val TAG = "PredictTask"
+
+        private val mDialog = ProgressDialog(context)
+        private val verifier = FaceVerification()
+        private var mDistance = 7000.0
 
         interface Callback
         {
 
-            fun onPredictComplete(confidence: Double)
+            fun onPredictComplete(result: Boolean, face: Face, distance: Double)
+        }
+
+        override fun onPreExecute()
+        {
+            super.onPreExecute()
+
+            mDialog.setMessage("Computing...")
+            mDialog.setCancelable(false)
+            mDialog.show()
+        }
+
+        override fun doInBackground(vararg params: Void?): Boolean
+        {
+            verifier.loadTrainedModel()
+
+            Log.d(TAG, "Start predicting...")
+
+            mDistance = verifier.predict(face)
+
+            return mDistance >= 0.0
+        }
+
+        override fun onPostExecute(result: Boolean?)
+        {
+            Log.d(TAG, "Predict completed!")
+
+            callback?.onPredictComplete(result ?: false, face, mDistance)
+            if (mDialog.isShowing)
+            {
+                mDialog.dismiss()
+            }
         }
     }
 

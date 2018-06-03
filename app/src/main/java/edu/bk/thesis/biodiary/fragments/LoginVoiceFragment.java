@@ -1,5 +1,6 @@
 package edu.bk.thesis.biodiary.fragments;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,9 +17,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import edu.bk.thesis.biodiary.R;
-import edu.bk.thesis.biodiary.activities.LoginActivity;
+import edu.bk.thesis.biodiary.core.voice.SoundMeter;
 import edu.bk.thesis.biodiary.core.voice.math.mfcc.FeatureVector;
 import edu.bk.thesis.biodiary.core.voice.math.vq.Codebook;
+import edu.bk.thesis.biodiary.models.VoiceData;
 import edu.bk.thesis.biodiary.utils.MessageHelper;
 import edu.bk.thesis.biodiary.utils.SerializeArray;
 import edu.bk.thesis.biodiary.utils.StorageHelper;
@@ -38,14 +40,14 @@ public class LoginVoiceFragment extends BaseVoiceFragment
 
     private List<Codebook> mUserCodebook;
 
-    @Override
-    public void onPause()
-    {
-        super.onPause();
+    private OnLoginVoiceCallbackReceived mOnLoginVoiceCallbackReceived;
 
-        if (mVerifyTask != null) {
-            mVerifyTask.cancel(true);
-        }
+    @Override
+    public void onAttach(Context context)
+    {
+        super.onAttach(context);
+
+        mOnLoginVoiceCallbackReceived = (OnLoginVoiceCallbackReceived) getActivity();
     }
 
     @Override
@@ -67,19 +69,32 @@ public class LoginVoiceFragment extends BaseVoiceFragment
         return view;
     }
 
-    @OnClick (R.id.btn_login_finish)
-    void finishLogin()
+    @Override
+    public void onPause()
     {
-        ((LoginActivity) getActivity()).finishLogin();
+        super.onPause();
+
+        if (mVerifyTask != null) {
+            mVerifyTask.cancel(true);
+        }
     }
 
     @OnClick (R.id.login_voice_pb_record)
     void identifySpeaker()
     {
-        Log.d(TAG, "Identifying Voice");
-        mSoundLevelDialog.setMessage("Say: \"My voice is my password, and it should log me in\"");
+        if (mVerifyTask != null &&
+            mVerifyTask.getStatus() != AsyncTask.Status.FINISHED) {
+            MessageHelper.showToast(getActivity(),
+                                    "Compute feature still running.",
+                                    Toast.LENGTH_SHORT);
+        }
+        else {
 
-        startRecording();
+            Log.d(TAG, "Identifying Voice");
+            mSoundLevelDialog.setMessage("Say: \"My voice is my password, and it should log me in\"");
+
+            startRecording();
+        }
     }
 
     private void startRecording()
@@ -87,7 +102,24 @@ public class LoginVoiceFragment extends BaseVoiceFragment
         mProcessingDialog.show();
         mSoundLevelDialog.show();
 
-        mVerifyTask = new VerifyTask("login");
+        SoundMeter soundMeter = new SoundMeter();
+        double     amplitude  = 0.0;
+        try {
+            MessageHelper.showToast(getActivity(),
+                                    "Please keep silence in 3 seconds!",
+                                    Toast.LENGTH_SHORT);
+
+            soundMeter.start();
+            soundMeter.getAmplitude();
+            Thread.sleep(3000);
+            amplitude = soundMeter.getAmplitude();
+            soundMeter.stop();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        mVerifyTask = new VerifyTask("login", amplitude);
         mVerifyTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -110,14 +142,23 @@ public class LoginVoiceFragment extends BaseVoiceFragment
         return tempAvgDist;
     }
 
+    public interface OnLoginVoiceCallbackReceived
+    {
+
+        void updateVoiceData(VoiceData voiceData);
+    }
+
     private class VerifyTask extends AsyncTask<Void, Void, Void>
     {
 
-        private float mResult;
+        private float  mResult;
+        private double mAmplitude;
 
-        public VerifyTask(String filename)
+        public VerifyTask(String filename, double amplitude)
         {
-            mVoiceAuthenticator.setOutputFile(filename);
+            mAmplitude = amplitude;
+            mVoiceAuthenticator.setOutputFile(
+                filename + "_" + System.currentTimeMillis() + "_" + amplitude);
         }
 
         @Override
@@ -135,7 +176,10 @@ public class LoginVoiceFragment extends BaseVoiceFragment
             mProcessingDialog.dismiss();
 
             float bestResult = mResult;
-            MessageHelper.showToast(getActivity(), "Distance: " + bestResult, Toast.LENGTH_LONG);
+            MessageHelper.showToast(getActivity(), "Please press LOGIN button.", Toast.LENGTH_LONG);
+
+            mOnLoginVoiceCallbackReceived.updateVoiceData(new VoiceData(bestResult / 250.0,
+                                                                        mAmplitude / 32767.0));
         }
     }
 }
