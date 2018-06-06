@@ -1,8 +1,10 @@
 package edu.bk.thesis.biodiary.fragments;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -100,26 +102,8 @@ public class LoginVoiceFragment extends BaseVoiceFragment
     private void startRecording()
     {
         mProcessingDialog.show();
-        mSoundLevelDialog.show();
 
-        SoundMeter soundMeter = new SoundMeter();
-        double     amplitude  = 0.0;
-        try {
-            MessageHelper.showToast(getActivity(),
-                                    "Please keep silence in 3 seconds!",
-                                    Toast.LENGTH_SHORT);
-
-            soundMeter.start();
-            soundMeter.getAmplitude();
-            Thread.sleep(3000);
-            amplitude = soundMeter.getAmplitude();
-            soundMeter.stop();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        mVerifyTask = new VerifyTask("login", amplitude);
+        mVerifyTask = new VerifyTask(getContext(), "login", mSoundLevelDialog);
         mVerifyTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -151,19 +135,65 @@ public class LoginVoiceFragment extends BaseVoiceFragment
     private class VerifyTask extends AsyncTask<Void, Void, Void>
     {
 
+        private Context        mContext;
+        private String         mFilename;
+        private ProgressDialog mSoundLevelDialog;
+
         private float  mResult;
         private double mAmplitude;
 
-        public VerifyTask(String filename, double amplitude)
+        public VerifyTask(Context context, String filename, ProgressDialog soundLevelDialog)
         {
-            mAmplitude = amplitude;
-            mVoiceAuthenticator.setOutputFile(
-                filename + "_" + System.currentTimeMillis() + "_" + amplitude);
+            mContext = context;
+            mFilename = filename;
+            mSoundLevelDialog = soundLevelDialog;
+
         }
 
         @Override
         protected Void doInBackground(Void... params)
         {
+            SoundMeter soundMeter = new SoundMeter();
+            double     amplitude  = 0.0;
+            try {
+                Handler handler = new Handler(mContext.getMainLooper());
+                handler.post(new Runnable()
+                {
+                    public void run()
+                    {
+                        MessageHelper.showToast(mContext,
+                                                "Please keep silence in 3 seconds!",
+                                                Toast.LENGTH_LONG);
+                    }
+                });
+
+                soundMeter.start();
+                soundMeter.getAmplitude();
+                Thread.sleep(3000);
+                amplitude = soundMeter.getAmplitude();
+                soundMeter.stop();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            mAmplitude = amplitude;
+
+            mVoiceAuthenticator.setOutputFile(
+                mFilename + "_" + System.currentTimeMillis() + "_" + amplitude);
+
+            Handler handler = new Handler(mContext.getMainLooper());
+            handler.post(new Runnable()
+            {
+                public void run()
+                {
+                    MessageHelper.showToast(mContext,
+                                            "Clearly read the phrase out loud.",
+                                            Toast.LENGTH_LONG);
+                    mSoundLevelDialog.show();
+                }
+            });
+
             mVoiceAuthenticator.startRecording();
             mSoundLevelDialog.dismiss();
             mResult = calculateDistances(mVoiceAuthenticator.getCurrentFeatureVector());

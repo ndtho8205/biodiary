@@ -1,7 +1,10 @@
 package edu.bk.thesis.biodiary.fragments;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -81,27 +84,11 @@ public class SetupVoiceFragment extends BaseVoiceFragment
     private void startRecording()
     {
         mProcessingDialog.show();
-        mSoundLevelDialog.show();
+//        mSoundLevelDialog.show();
 
-        SoundMeter soundMeter = new SoundMeter();
-        double     amplitude  = 0.0;
-        try {
-            MessageHelper.showToast(getActivity(),
-                                    "Please keep silence in 3 seconds!",
-                                    Toast.LENGTH_SHORT);
 
-            soundMeter.start();
-            soundMeter.getAmplitude();
-            Thread.sleep(3000);
-            amplitude = soundMeter.getAmplitude();
-            soundMeter.stop();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        mComputeFeaturesTask = new ComputeFeaturesTask(
-            String.valueOf(mAudioQuantityCounter) + "_" + amplitude);
+        mComputeFeaturesTask = new ComputeFeaturesTask(getActivity(), mSoundLevelDialog,
+                                                       String.valueOf(mAudioQuantityCounter));
         mComputeFeaturesTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -117,14 +104,61 @@ public class SetupVoiceFragment extends BaseVoiceFragment
     private class ComputeFeaturesTask extends AsyncTask<Void, Void, Boolean>
     {
 
-        public ComputeFeaturesTask(String filename)
+        private ProgressDialog mSoundLevelDialog;
+        private Context        mContext;
+        private String         mFilename;
+
+        public ComputeFeaturesTask(Context context,
+                                   ProgressDialog soundLevelDialog,
+                                   String filename)
         {
-            mVoiceAuthenticator.setOutputFile(filename);
+            mContext = context;
+            mFilename = filename;
+            mSoundLevelDialog = soundLevelDialog;
         }
 
         @Override
         protected Boolean doInBackground(Void... params)
         {
+            SoundMeter soundMeter = new SoundMeter();
+            double     amplitude  = 0.0;
+            try {
+                Handler handler = new Handler(mContext.getMainLooper());
+                handler.post(new Runnable()
+                {
+                    public void run()
+                    {
+                        MessageHelper.showToast(mContext,
+                                                "Please keep silence in 3 seconds!",
+                                                Toast.LENGTH_LONG);
+                    }
+                });
+
+                soundMeter.start();
+                soundMeter.getAmplitude();
+                Thread.sleep(3000);
+                amplitude = soundMeter.getAmplitude();
+                soundMeter.stop();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            mVoiceAuthenticator.setOutputFile(mFilename + "_" + amplitude);
+
+
+            Handler handler = new Handler(mContext.getMainLooper());
+            handler.post(new Runnable()
+            {
+                public void run()
+                {
+                    MessageHelper.showToast(mContext,
+                                            "Clearly read the phrase out loud.",
+                                            Toast.LENGTH_LONG);
+                    mSoundLevelDialog.show();
+                }
+            });
+
             Log.i(TAG, "Compute features of new audio");
             Log.d(TAG, "Mic threshold: " + mVoiceAuthenticator.getMicThreshold());
 
@@ -146,9 +180,6 @@ public class SetupVoiceFragment extends BaseVoiceFragment
         @Override
         protected void onPreExecute()
         {
-            MessageHelper.showToast(getActivity(),
-                                    "Clearly read the phrase out loud.",
-                                    Toast.LENGTH_LONG);
         }
 
         @Override
