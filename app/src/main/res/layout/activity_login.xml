@@ -11,15 +11,29 @@
     <android.support.v4.view.ViewPager
         android:id="@+id/login_view_pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginBottom="8dp"
         android:layout_weight="2" />
 
-    <Button
-        android:id="@+id/btn_login"
-        android:layout_width="wrap_content"
-        android:layout_height="36dp"
-        android:layout_gravity="end"
-        android:layout_marginTop="8dp"
-        android:layout_weight="1"
-        android:text="LOGIN" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end">
+
+        <Button
+            android:id="@+id/btn_reset"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="128dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="RESET" />
+
+        <Button
+            android:id="@+id/btn_login"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="128dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="LOGIN" />
+    </LinearLayout>
 </LinearLayout>

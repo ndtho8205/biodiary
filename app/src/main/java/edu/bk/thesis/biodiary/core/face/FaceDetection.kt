@@ -60,7 +60,6 @@ class FaceDetection(context: Context)
                                       Size(MIN_FACE_WIDTH_THRESHOLD, MIN_FACE_WIDTH_THRESHOLD),
                                       Size(4 * MIN_FACE_WIDTH_THRESHOLD,
                                            4 * MIN_FACE_WIDTH_THRESHOLD))
-        Log.d(TAG, "Number of face detected in images: " + facesRect.size())
 
         val faceIndex = when
         {

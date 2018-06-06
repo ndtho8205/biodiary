@@ -2,10 +2,12 @@ package edu.bk.thesis.biodiary.activities;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
@@ -49,6 +51,19 @@ public class LoginActivity extends AppCompatActivity
         public void onLoginComplete(boolean result)
         {
             Log.d(TAG, "Login: " + result);
+
+            AlertDialog alertDialog = new AlertDialog.Builder(LoginActivity.this).create();
+            alertDialog.setTitle("Login");
+            alertDialog.setMessage("Login result: " + result);
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                  new DialogInterface.OnClickListener()
+                                  {
+                                      public void onClick(DialogInterface dialog, int which)
+                                      {
+                                          dialog.dismiss();
+                                      }
+                                  });
+            alertDialog.show();
         }
     };
 
@@ -93,6 +108,18 @@ public class LoginActivity extends AppCompatActivity
         mPreferencesHandler = new PreferencesHandler(getApplicationContext());
 
         initViews();
+    }
+
+    @OnClick (R.id.btn_reset)
+    void onResetButtonPressed()
+    {
+        mPreferencesHandler.reset();
+
+        Intent intentToStartSplashScreenActivity = new Intent(getApplicationContext(),
+                                                              SplashScreenActivity.class);
+        intentToStartSplashScreenActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intentToStartSplashScreenActivity);
+        finish();
     }
 
     @OnClick (R.id.btn_login)

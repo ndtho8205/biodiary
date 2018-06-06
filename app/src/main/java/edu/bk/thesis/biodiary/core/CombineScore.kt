@@ -12,7 +12,7 @@ class CombineScore(context: Context)
     private val MODEL_FILE = "file:///android_asset/frozen_mlpThesis.pb"
     private val INPUT_NODES = arrayOf("X:0")
     private val OUTPUT_NODES = arrayOf("y_pred:0")
-    private val INPUT_DIM = longArrayOf(1, 512)
+    private val INPUT_DIM = longArrayOf(1, 6)
 
     var inferenceInterface: TensorFlowInferenceInterface =
             TensorFlowInferenceInterface(context.assets, MODEL_FILE)
