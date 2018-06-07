@@ -37,6 +37,7 @@ public class BaseVoiceActivity extends AppCompatActivity
         mSoundLevelDialog = new ProgressDialog(this, ProgressDialog.STYLE_HORIZONTAL);
         mSoundLevelDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         mSoundLevelDialog.setTitle("Listening...");
+        mSoundLevelDialog.setMessage("Say: \"Mở khoá\"");
         mSoundLevelDialog.setCancelable(false);
 
         mProcessingDialog = new ProgressDialog(this);

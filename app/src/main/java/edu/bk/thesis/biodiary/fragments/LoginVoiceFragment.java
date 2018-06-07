@@ -93,7 +93,6 @@ public class LoginVoiceFragment extends BaseVoiceFragment
         else {
 
             Log.d(TAG, "Identifying Voice");
-            mSoundLevelDialog.setMessage("Say: \"My voice is my password, and it should log me in\"");
 
             startRecording();
         }

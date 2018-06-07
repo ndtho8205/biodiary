@@ -50,8 +50,6 @@ public class SetupVoiceFragment extends BaseVoiceFragment
 
         ButterKnife.bind(this, view);
 
-        mSoundLevelDialog.setMessage("Say: \"My voice is my password, and it should log me in\"");
-
         init();
 
         return view;
