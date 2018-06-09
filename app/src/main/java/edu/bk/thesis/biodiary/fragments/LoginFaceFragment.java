@@ -68,14 +68,10 @@ public class LoginFaceFragment extends Fragment implements CvCameraPreview.CvCam
                 face.setFaceImageName(face.getFaceImageName() + "_" + faceData);
                 face.save();
 
-                FaceData data = new FaceData(distance,
-                                             qualityBrightness,
-                                             qualityContrast,
-                                             qualitySharpness);
-//                FaceData data = new FaceData(distance / 8000.0,
-//                                             qualityBrightness / 255.0,
-//                                             (qualityContrast - 30.0) / 50.0,
-//                                             (qualitySharpness - 1.0) / 10.0);
+                FaceData data = new FaceData(distance / 8000.0,
+                                             qualityBrightness / 255.0,
+                                             (qualityContrast - 30.0) / 50.0,
+                                             (qualitySharpness - 1.0) / 10.0);
 
                 mOnLoginFaceCallbackReceived.updateFaceData(data);
 

@@ -48,11 +48,11 @@ public class LoginActivity extends AppCompatActivity
     private LoginTask.Callback mLoginTaskCallback = new LoginTask.Callback()
     {
         @Override
-        public void onLoginComplete(boolean result)
+        public void onLoginComplete(final boolean result)
         {
             Log.d(TAG, "Login: " + result);
 
-            AlertDialog alertDialog = new AlertDialog.Builder(LoginActivity.this).create();
+            AlertDialog alertDial7  og = new AlertDialog.Builder(LoginActivity.this).create();
             alertDialog.setTitle("Login");
             alertDialog.setMessage("Login result: " + result);
             alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
@@ -61,6 +61,9 @@ public class LoginActivity extends AppCompatActivity
                                       public void onClick(DialogInterface dialog, int which)
                                       {
                                           dialog.dismiss();
+                                          if (result) {
+                                              finishLogin();
+                                          }
                                       }
                                   });
             alertDialog.show();

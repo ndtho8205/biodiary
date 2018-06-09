@@ -26,6 +26,7 @@ public class BaseVoiceFragment extends Fragment
         mSoundLevelDialog = new ProgressDialog(getActivity(), ProgressDialog.STYLE_HORIZONTAL);
         mSoundLevelDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         mSoundLevelDialog.setTitle("Listening...");
+        mSoundLevelDialog.setMessage("Say: \"Mở khoá\"");
         mSoundLevelDialog.setCancelable(false);
 
         mProcessingDialog = new ProgressDialog(getActivity());
