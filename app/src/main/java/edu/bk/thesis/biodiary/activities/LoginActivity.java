@@ -52,7 +52,7 @@ public class LoginActivity extends AppCompatActivity
         {
             Log.d(TAG, "Login: " + result);
 
-            AlertDialog alertDial7  og = new AlertDialog.Builder(LoginActivity.this).create();
+            AlertDialog alertDialog = new AlertDialog.Builder(LoginActivity.this).create();
             alertDialog.setTitle("Login");
             alertDialog.setMessage("Login result: " + result);
             alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
