@@ -4,12 +4,13 @@ import android.content.Context
 import android.util.Log
 import edu.bk.thesis.biodiary.models.FaceData
 import edu.bk.thesis.biodiary.models.VoiceData
+import edu.bk.thesis.biodiary.utils.StorageHelper
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface
 
 class CombineScore(context: Context)
 {
 
-    private val MODEL_FILE = "file:///android_asset/frozen_mlpThesis.pb"
+    private val MODEL_FILE = StorageHelper.retrieveTensorflowModelPath()
     private val INPUT_NODES = arrayOf("X:0")
     private val OUTPUT_NODES = arrayOf("y_pred:0")
     private val INPUT_DIM = longArrayOf(1, 6)
