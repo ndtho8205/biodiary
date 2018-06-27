@@ -144,7 +144,6 @@ public class LoginVoiceFragment extends BaseVoiceFragment
             mContext = context;
             mFilename = filename;
             mSoundLevelDialog = soundLevelDialog;
-
         }
 
         @Override
@@ -203,7 +202,10 @@ public class LoginVoiceFragment extends BaseVoiceFragment
             mProcessingDialog.dismiss();
 
             float bestResult = mResult;
-            MessageHelper.showToast(getActivity(), "Please press LOGIN button.", Toast.LENGTH_LONG);
+            MessageHelper.showToast(getActivity(),
+                                    "Result: " + bestResult + ".\n" +
+                                    "Please press LOGIN button.",
+                                    Toast.LENGTH_LONG);
 
             mOnLoginVoiceCallbackReceived.updateVoiceData(new VoiceData(bestResult / 250.0,
                                                                         mAmplitude / 32767.0));

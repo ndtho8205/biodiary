@@ -64,19 +64,18 @@ public class LoginFaceFragment extends Fragment implements CvCameraPreview.CvCam
                                   qualitySharpness;
                 Log.d(TAG, faceData);
 
-
                 face.setFaceImageName(face.getFaceImageName() + "_" + faceData);
                 face.save();
 
                 FaceData data = new FaceData(distance / 8000.0,
                                              qualityBrightness / 255.0,
-                                             (qualityContrast - 30.0) / 50.0,
-                                             (qualitySharpness - 1.0) / 10.0);
+                                             (qualityContrast - 10.0) / 80.0,
+                                             (qualitySharpness - 1.0) / 30.0);
 
                 mOnLoginFaceCallbackReceived.updateFaceData(data);
 
                 MessageHelper.showToast(getActivity(),
-                                        "Distance: " + distance + ". " +
+                                        "Result: " + distance + ".\n" +
                                         "Picture is taken. Next step, please.",
                                         Toast.LENGTH_LONG);
             }

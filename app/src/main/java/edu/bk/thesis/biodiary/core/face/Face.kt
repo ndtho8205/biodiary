@@ -36,7 +36,7 @@ data class Face(val containerImage: Mat,
     private fun preprocessing(faceImage: Mat): Mat
     {
         val preprocessor = ImagePreprocessing()
-        val aligned = preprocessor.scaleToStandardSize(faceImage)
+        val aligned = preprocessor.equalizeHist(preprocessor.scaleToStandardSize(faceImage))
         return aligned
     }
 
